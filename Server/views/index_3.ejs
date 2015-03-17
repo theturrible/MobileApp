@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include head.ejs %>
+    <link rel="stylesheet" href="/css/index.css"></script>
+    <script type="text/javascript" src="/js/index.js"></script>
+
+</head>
+<div id="scroll-animate">
+  <div id="scroll-animate-main">
+    <div class="wrapper-parallax">
+
+    <header>
+        <% include header_index.ejs %>
+    </header>
+    
+            <div class="content container" style="width: auto;">
+                <div class="row">
+                    <div class="col-sm-6 col-md-4 col-md-offset-4">
+                        <div class="account-wall">
+                            <div id="my-tab-content" class="tab-content">
+                                    <img class="profile-img" src="http://upload.wikimedia.org/wikipedia/en/b/ba/New_VCU_Rams_Logo.png" alt=""/>
+                                    <div class="tab-pane active" id="login">
+                                        <div class="btn-group-vertical center-block" role="group" aria-label="...">
+                                            
+                                            <a href="/login" class="btn btn-primary btn-lg btn-block">Login</a>
+                                            <a href="/signup" class="btn btn-default btn-lg btn-block">Signup</a> 
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+      <footer>
+        <% include footer.ejs %>
+      </footer>
+
+    </div>
+  </div>
+</div>
+</html>
