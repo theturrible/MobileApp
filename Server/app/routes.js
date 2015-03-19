@@ -69,9 +69,6 @@ module.exports = function(app, passport) {
 
 
 
-
-
-
     // =====================================
     // API =================================
     // =====================================
@@ -98,6 +95,7 @@ module.exports = function(app, passport) {
         // set the user's local credentials
         newUser.local.email    = req.body.email;
         newUser.local.password = req.body.password;
+        newUser.role           = req.body.role;
 
         // save the user
         newUser.save(function(err) {
@@ -119,6 +117,21 @@ module.exports = function(app, passport) {
             }
         });
     });
+
+    /*
+    Example of getting a model by where email = req.body.email
+    app.post('/api/users/login', function (req, res){
+        console.log(req.body.email);
+        return UserModel.findOne({'local.email': req.body.email}, function(err, user){
+            if (!err) {
+                console.log("FOUND: " + user.local.password);
+            } else {
+                console.log(err);
+            }
+            return res.send(user);
+        });
+    });
+    */
 
     //UPDATE USER BY ID
     app.put('/api/users/:id', function (req, res){
@@ -158,17 +171,27 @@ module.exports = function(app, passport) {
 
     //API CALL TO CREATE A NEW USER
     // --returns 'id' in JSON or unauthorized if it fails.
-    app.post('/api/signup', passport.authenticate('local-signup', { session: false }),
+    app.post('/api/signup', passport.authenticate('local-signup'),
         function(req, res) {
             //res.json({ id: req.user.id, email: req.user.email });
             //returns id if successful
+            UserModel.findById(req.user.id, function (err, user) {
+                return user.save(function (err) {
+                    if (!err) {
+                        console.log("updated");
+                    } else {
+                        console.log(err);
+                    }
+                    return res.send(user);
+                });
+        });
             res.json({ id: req.user.id });
         }
     );
 
     //API CALL TO LOGIN A USER
     // --returns 'id' in JSON or unauthorized if it fails.
-    app.post('/api/login', passport.authenticate('local-login',  { session: false }),
+    app.post('/api/login', passport.authenticate('local-login'),
         function(req, res) {
             //res.json({ id: req.user.id, email: req.user.email });
             //returns id if successful
@@ -176,6 +199,22 @@ module.exports = function(app, passport) {
         }
     );
 
+    app.get('/api/logged', function(req, res){
+        console.log(req);
+        if(req.isAuthenticated())
+            console.log(req.user);
+            return res.send(true);
+        return res.send(false);
+    });
+
+    app.get('/api/logout', function(req, res) {
+        try{
+            req.logout();
+        }catch(err){
+            return res.send(err);
+        }
+        return res.send(true);
+    });
 }
 
 // route middleware to make sure a user is logged in

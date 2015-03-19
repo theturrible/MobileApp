@@ -1,5 +1,7 @@
 // config/passport.js
 
+//npm install -g tishadow -- titanium sim detects file changes and 
+
 // load all the things we need
 var LocalStrategy   = require('passport-local').Strategy;
 
@@ -76,7 +78,7 @@ module.exports = function(passport) {
         passReqToCallback : true // allows us to pass back the entire request to the callback
     },
     function(req, email, password, done) {
-        console.log(role);
+        //console.log(role);
         // asynchronous
         // User.findOne wont fire unless data is sent back
         process.nextTick(function() {
@@ -94,19 +96,26 @@ module.exports = function(passport) {
             } else {
 
                 // if there is no user with that email
-                // create the user
-                var newUser            = new User();
+                var ext = email.split("@")[1];
+                console.log(ext);
+                if(ext !== 'vcu.edu' || ext !== 'mymail.vcu.edu'){
+                    return done(null, false, req.flash('signupMessage', 'That email is not a VCU domain.'))
+                }else{
+                    // create the user
+                    var newUser            = new User();
 
-                // set the user's local credentials
-                newUser.local.email    = email;
-                newUser.local.password = newUser.generateHash(password);
+                    // set the user's local credentials
+                    newUser.local.email    = email;
+                    newUser.local.password = newUser.generateHash(password);
+                    newUser.role           = req.body.role;
 
-                // save the user
-                newUser.save(function(err) {
-                    if (err)
-                        throw err;
-                    return done(null, newUser);
-                });
+                    // save the user
+                    newUser.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, newUser);
+                    });
+                }
             }
 
         });    
@@ -114,5 +123,7 @@ module.exports = function(passport) {
         });
 
     }));
+
+    
 
 };
