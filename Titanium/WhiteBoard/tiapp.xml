@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
-    <id>com.whiteboard.whiteboardapp</id>
-    <name>WhiteBoard</name>
+    <id>com.whiteboard.app</id>
+    <name>WhiteBoard2.0</name>
     <version>1.0</version>
     <publisher>theturrible</publisher>
-    <url>http://whiteboard.io</url>
-    <description/>
+    <url>http://</url>
+    <description>undefined</description>
     <copyright>2015 by theturrible</copyright>
     <icon>appicon.png</icon>
     <fullscreen>false</fullscreen>
     <navbar-hidden>false</navbar-hidden>
     <analytics>true</analytics>
-    <guid>446a9466-db0f-4eaa-90fd-bb9837c7dee9</guid>
+    <guid>71c3af55-5e02-402a-a15f-1d5a77334182</guid>
     <property name="ti.ui.defaultunit" type="string">dp</property>
     <ios>
         <plist>
@@ -51,11 +51,11 @@
     <deployment-targets>
         <target device="android">true</target>
         <target device="blackberry">false</target>
-        <target device="ipad">true</target>
+        <target device="ipad">false</target>
         <target device="iphone">true</target>
         <target device="mobileweb">true</target>
     </deployment-targets>
-    <sdk-version>3.5.0.GA</sdk-version>
+    <sdk-version>3.5.1.GA</sdk-version>
     <plugins>
         <plugin version="1.0">ti.alloy</plugin>
     </plugins>
