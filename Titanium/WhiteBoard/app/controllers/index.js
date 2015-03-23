@@ -8,6 +8,15 @@ function doClick(e) {
 
 $.index.open();
 
+$.btnSignup.addEventListener('click', function(e){ 
+//controller name is 'sample
+  	$.index.close();
+ 	var sample = Alloy.createController('signup').getView()
+ 
+  
+   });
+
+
 $.btnLogin.addEventListener('click',function(e)
 {
    Titanium.API.info("Login Button Clicked");
@@ -44,6 +53,7 @@ $.btnLogin.addEventListener('click',function(e)
 		Titanium.API.log("UserName: " + $.txtPass.value);
 		
 		httpClient.send(JSON.stringify(data));
+		
 		
 	}
 });
