@@ -12,7 +12,7 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
-        res.render('index_3.ejs'); // load the index.ej file
+        res.render('index_3.ejs'); // load the index.ejs file
     });
 
     // =====================================
@@ -83,7 +83,7 @@ module.exports = function(app, passport) {
         if (!err) {
             return res.send(users);
         } else {
-            return console.log(err);
+            return res.send(err);
         }
         });
     });
@@ -116,7 +116,7 @@ module.exports = function(app, passport) {
             if (!err) {
                 return res.send(user);
             } else {
-                return console.log(err);
+                return res.send(err);
             }
         });
     });
@@ -157,10 +157,10 @@ module.exports = function(app, passport) {
 
                 return user.save(function (err) {
                     if (!err) {
-                        console.log("updated");
+                        //console.log("updated");
                         return res.send(user);
                     } else {
-                        console.log(err);
+                        //console.log(err);
                         return res.send(err);
                     }
                 });
@@ -174,7 +174,7 @@ module.exports = function(app, passport) {
         return UserModel.findById(req.params.id, function (err, user) {
             return user.remove(function (err) {
             if (!err) {
-                console.log("removed");
+                //console.log("removed");
                 return res.send('user removed');
             } else {
                 console.log(err);
@@ -209,7 +209,7 @@ module.exports = function(app, passport) {
             //res.json({ id: req.user.id, email: req.user.email });
             //returns id if successful
             //console.log(req.user.local.email);
-            res.json({ id: req.user.id, email: req.user.local.email});
+            res.json({ id: req.user.id });
         }
     );
 
@@ -217,15 +217,15 @@ module.exports = function(app, passport) {
     app.get('/api/logged', function(req, res){
         //console.log(req);
         if(req.isAuthenticated())
-            console.log(req.user.local.email);
+            //console.log(req.user.local.email);
             return res.send(true);
         return res.send(false);
     });
-    
+
     // --returns true if logout of user who made api call is logged out, false otherwise.
     app.get('/api/logout', function(req, res) {
         try{
-            console.log(req.user.local.email);
+            //console.log(req.user.local.email);
             req.logout();
         }catch(err){
             return res.send(err);
