@@ -97,7 +97,7 @@ module.exports = function(passport) {
 
                 // if there is no user with that email
                 var ext = email.split("@")[1];
-                console.log(ext);
+                //console.log(ext);
                 if(ext !== 'vcu.edu' && ext !== 'mymail.vcu.edu'){
                     return done(null, false, req.flash('signupMessage', 'That email is not a VCU domain.'))
                 }else{

@@ -12,7 +12,7 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
-        res.render('index_3.ejs'); // load the index.ejs file
+        res.render('index_3.ejs'); // load the index.ej file
     });
 
     // =====================================
@@ -89,6 +89,8 @@ module.exports = function(app, passport) {
     });
 
     //CREATE A NEW USER
+    //commented this out but leaving for reference. USE /API/SIGNUP
+    /*
     app.post('/api/users', function (req, res) {
         var newUser            = new UserModel();
 
@@ -106,6 +108,7 @@ module.exports = function(app, passport) {
 
         return res.send(newUser);
     });
+    */
 
     //GET USER BY ID
     app.get('/api/users/:id', function (req, res){
@@ -134,22 +137,39 @@ module.exports = function(app, passport) {
     */
 
     //UPDATE USER BY ID
+    // --accepts ID as url parameter
+    // --returns updated user json data if successful, else returns the err.
+
+    //can add for new fields in user ie) FNAME and LNAME
     app.put('/api/users/:id', function (req, res){
         return UserModel.findById(req.params.id, function (err, user) {
-            user.email = req.body.email;
-            user.password = req.body.password;
+            if(req.body.email){
+                user.local.email = req.body.email;
+            }
+
+            if(req.body.password){
+                user.local.password = user.generateHash(req.body.password);
+            }
+
+            if(req.body.role){
+                 user.role = req.body.role;
+            }
+
                 return user.save(function (err) {
                     if (!err) {
                         console.log("updated");
+                        return res.send(user);
                     } else {
                         console.log(err);
+                        return res.send(err);
                     }
-                    return res.send(user);
                 });
         });
     });
 
-    //DELTE A USER BY ID
+    //DELETE A USER BY ID
+    //  --accepts ID as url parameter
+    //  --returns user as json data, else returns err
     app.delete('/api/users/:id', function (req, res) {
         return UserModel.findById(req.params.id, function (err, user) {
             return user.remove(function (err) {
@@ -158,6 +178,7 @@ module.exports = function(app, passport) {
                 return res.send('user removed');
             } else {
                 console.log(err);
+                return res.send(err);
             }
             });
         });
@@ -170,45 +191,41 @@ module.exports = function(app, passport) {
     // =====================================
 
     //API CALL TO CREATE A NEW USER
+    // --accepts: JSON -> {"email":"user_email","password":"user_password(plain text),"role":"student or professor(depends on login location: app- student, web-professor)"}
     // --returns 'id' in JSON or unauthorized if it fails.
     app.post('/api/signup', passport.authenticate('local-signup'),
         function(req, res) {
             //res.json({ id: req.user.id, email: req.user.email });
             //returns id if successful
-            UserModel.findById(req.user.id, function (err, user) {
-                return user.save(function (err) {
-                    if (!err) {
-                        console.log("updated");
-                    } else {
-                        console.log(err);
-                    }
-                    return res.send(user);
-                });
-        });
             res.json({ id: req.user.id });
         }
     );
 
     //API CALL TO LOGIN A USER
+    // --accepts: JSON -> {"email":"user_email","password":"user_password(plain text)}
     // --returns 'id' in JSON or unauthorized if it fails.
     app.post('/api/login', passport.authenticate('local-login'),
         function(req, res) {
             //res.json({ id: req.user.id, email: req.user.email });
             //returns id if successful
-            res.json({ id: req.user.id });
+            //console.log(req.user.local.email);
+            res.json({ id: req.user.id, email: req.user.local.email});
         }
     );
 
+    // --returns true if the user who ade api call is logged in on server side session, false otherwise or not logged in.
     app.get('/api/logged', function(req, res){
-        console.log(req);
+        //console.log(req);
         if(req.isAuthenticated())
-            console.log(req.user);
+            console.log(req.user.local.email);
             return res.send(true);
         return res.send(false);
     });
-
+    
+    // --returns true if logout of user who made api call is logged out, false otherwise.
     app.get('/api/logout', function(req, res) {
         try{
+            console.log(req.user.local.email);
             req.logout();
         }catch(err){
             return res.send(err);
