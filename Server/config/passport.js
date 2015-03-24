@@ -1,6 +1,6 @@
 // config/passport.js
 
-//npm install -g tishadow -- titanium sim detects file changes and 
+//npm install -g tishadow -- titanium sim detects file changes and
 
 // load all the things we need
 var LocalStrategy   = require('passport-local').Strategy;
@@ -118,12 +118,12 @@ module.exports = function(passport) {
                 }
             }
 
-        });    
+        });
 
         });
 
     }));
 
-    
+
 
 };

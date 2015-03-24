@@ -22,7 +22,7 @@ module.exports = function(app, passport) {
     app.get('/login', function(req, res) {
 
         // render the page and pass in any flash data if it exists
-        res.render('login.ejs', { message: req.flash('loginMessage') }); 
+        res.render('login.ejs', { message: req.flash('loginMessage') });
     });
 
     app.post('/login',  passport.authenticate('local-login', {
@@ -294,6 +294,9 @@ module.exports = function(app, passport) {
 
     // --returns true if the user who ade api call is logged in on server side session, false otherwise or not logged in.
     app.get('/api/logged', function(req, res){
+        var id = req.user.id;
+        
+
         //console.log(req);
         if(req.isAuthenticated())
             //console.log(req.user.local.email);
@@ -316,7 +319,7 @@ module.exports = function(app, passport) {
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
 
-    // if user is authenticated in the session, carry on 
+    // if user is authenticated in the session, carry on
     if (req.isAuthenticated())
         return next();
 
@@ -328,5 +331,5 @@ function isProf(req,res,next) {
     if(req.user.role === "professor")
         return next();
    // res.redirect('/login');
-   res.render('login.ejs', { message: 'Only professors may use the Web App' }); 
+   res.render('login.ejs', { message: 'Only professors may use the Web App' });
 }

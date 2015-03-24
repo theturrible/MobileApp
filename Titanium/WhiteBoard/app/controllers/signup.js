@@ -2,7 +2,7 @@
 Titanium.UI.setBackgroundImage("shared/bkg_login.jpg");
  var win = Titanium.UI.createWindow();
  
-var username = Titanium.UI.createTextField({
+var txtEmail = Titanium.UI.createTextField({
     color:'#336699',
     top:200,
     left:50,
@@ -13,9 +13,9 @@ var username = Titanium.UI.createTextField({
     returnKeyType:Titanium.UI.RETURNKEY_DEFAULT,
     borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED
 });
-win.add(username);
+win.add(txtEmail);
  
-var password = Titanium.UI.createTextField({
+var txtPass = Titanium.UI.createTextField({
     color:'#336699',
     top:250,
     left:50,
@@ -27,9 +27,9 @@ var password = Titanium.UI.createTextField({
     returnKeyType:Titanium.UI.RETURNKEY_DEFAULT,
     borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED
 });
-win.add(password);
+win.add(txtPass);
  
-var loginBtn = Titanium.UI.createButton({
+var btnSignup = Titanium.UI.createButton({
     title:'Signup',
     top: 300,
     width:90,
@@ -37,5 +37,44 @@ var loginBtn = Titanium.UI.createButton({
     borderRadius:1,
     font:{fontFamily:'Arial',fontWeight:'bold',fontSize:14}
 });
-win.add(loginBtn);
+win.add(btnSignup);
+
+btnSignup.addEventListener('click', function(){
+	
+	var httpClient = Ti.Network.createHTTPClient({
+			timeout: 10000
+	});
+	
+	httpClient.onload = function(){
+	//actual code
+		Titanium.API.log("onload");
+		
+		var res = JSON.parse(httpClient.responseText); 
+		Titanium.API.log(res);
+		Titanium.App.Properties.setString("loginID", res.id);			
+		win.close();
+		Alloy.createController('dashboard').getView();
+	};
+	httpClient.onerror = function(){
+		Titanium.API.log("error");
+		alert("I'm sorry, sign up was not successful");
+		Alloy.createController('index').getView();
+	};
+	
+	var data = {
+		email: txtEmail.value,
+		password: txtPass.value,
+		role: "student"
+	};
+	
+	
+	
+	httpClient.open('POST', 'http://localhost:8080/api/signup');
+	httpClient.setRequestHeader('Content-Type', 'application/json');
+	httpClient.send(JSON.stringify(data));
+
+	
+});
+
+
 win.open();

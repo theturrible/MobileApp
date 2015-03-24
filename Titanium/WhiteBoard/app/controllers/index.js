@@ -6,14 +6,44 @@ function doClick(e) {
 }
 
 
-$.index.open();
+var id = Titanium.App.Properties.getString("loginID", 
+function(){
+	$.index.open();
+});
+
+var httpClient = Ti.Network.createHTTPClient({
+		timeout: 10000
+});
+
+httpClient.onload = function(){
+//actual code
+	var res = httpClient.responseText; 
+	Titanium.API.log(res);
+	alert(res);
+	if(res == "true"){
+		Alloy.createController('dashboard').getView()
+	}else{
+		$.index.open();
+	}
+	
+};
+httpClient.onerror = function(){
+	alert("eRror")
+	$.index.open();
+};
+
+httpClient.open('GET', 'http://localhost:8080/api/logged');
+httpClient.setRequestHeader('Content-Type', 'application/json');
+httpClient.send();
+
+
+
+
 
 $.btnSignup.addEventListener('click', function(e){ 
 //controller name is 'sample
   	$.index.close();
- 	var sample = Alloy.createController('signup').getView()
- 
-  
+ 	var signup = Alloy.createController('signup').getView() 
    });
 
 
@@ -32,7 +62,9 @@ $.btnLogin.addEventListener('click',function(e)
 		);
 		httpClient.onload = function(){
 			var responseJson = JSON.parse(httpClient.responseText);
-			alert(responseJson.id);
+			Titanium.App.Properties.setString("loginID", responseJson.id);			
+			$.index.close();
+			Alloy.createController('dashboard').getView();
 		
 		};
 		httpClient.onerror = function(){
