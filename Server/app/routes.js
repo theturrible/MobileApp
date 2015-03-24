@@ -205,9 +205,6 @@ module.exports = function(app, passport) {
     });
 
     //POST A NEW COURES
-    //ATENTION: postman json post does not work for whatever reason, if you
-    //          want to post from postman use x-www-form-blahblah u get it
-    //
     //  --accepts: json format, see below for example
     //  --returns: course id and information
     app.post('/api/courses', function (req, res) {
@@ -221,15 +218,14 @@ module.exports = function(app, passport) {
         newCourse.professor      = req.body.professor;
         newCourse.classDays.day1 = req.body.day1;
         newCourse.classDays.day2 = req.body.day2;
-        newCourse.classDays.day3 = req.body.day3;;
+        newCourse.classDays.day3 = req.body.day3;
         newCourse.startTime      = req.body.startTime;
-        newCourse.duration       = req.body.duration
+        newCourse.duration       = req.body.duration;
 
         // save the user
-        newCourse.save(function(err) {
+        newCourse.save(function(err, course) {
             if (err)
                 return err;
-            return newCourse;
         });
 
         return res.send(200, newCourse);
@@ -240,15 +236,19 @@ module.exports = function(app, passport) {
     //  --returns success or err
     app.delete('/api/courses/:id', function (req, res) {
         return CourseModel.findById(req.params.id, function (err, course) {
-            return course.remove(function (err) {
-            if (!err) {
-                //console.log("removed");
-                return res.send(200, 'course removed');
-            } else {
-                //console.log(err);
-                return res.send(err);
+            try{
+                return course.remove(function (err) {
+                    if (!err) {
+                        //console.log("removed");
+                        return res.send(200, 'course removed');
+                    } else {
+                        //console.log(err);
+                        return res.send(400);
+                    }
+                });
+            }catch(err){
+                return res.send(400);
             }
-            });
         });
     });
     /* {
