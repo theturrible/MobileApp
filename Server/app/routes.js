@@ -25,7 +25,7 @@ module.exports = function(app, passport) {
         res.render('login.ejs', { message: req.flash('loginMessage') }); 
     });
 
-    app.post('/login', passport.authenticate('local-login', {
+    app.post('/login',  passport.authenticate('local-login', {
         successRedirect : '/profile', // redirect to the secure profile section
         failureRedirect : '/login', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
@@ -53,7 +53,7 @@ module.exports = function(app, passport) {
     // =====================================
     // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
-    app.get('/profile', isLoggedIn, function(req, res) {
+    app.get('/profile', isProf, isLoggedIn, function(req, res) {
         res.render('profile.ejs', {
             user : req.user // get the user out of session and pass to template
         });
@@ -322,4 +322,11 @@ function isLoggedIn(req, res, next) {
 
     // if they aren't redirect them to the home page
     res.redirect('/');
+}
+
+function isProf(req,res,next) {
+    if(req.user.role === "professor")
+        return next();
+   // res.redirect('/login');
+   res.render('login.ejs', { message: 'Only professors may use the Web App' }); 
 }
