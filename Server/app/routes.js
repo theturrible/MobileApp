@@ -78,6 +78,7 @@ module.exports = function(app, passport) {
     // =====================================
 
     //GET ALL USERES
+    // --returns all users, needs admin role check
     app.get('/api/users', function (req, res){
         return UserModel.find(function (err, users) {
         if (!err) {
@@ -111,6 +112,8 @@ module.exports = function(app, passport) {
     */
 
     //GET USER BY ID
+    // --accepts _id of user as url extension
+    // --returns: user schema in json
     app.get('/api/users/:id', function (req, res){
         return UserModel.findById(req.params.id, function (err, user) {
             if (!err) {
@@ -141,6 +144,7 @@ module.exports = function(app, passport) {
     // --returns updated user json data if successful, else returns the err.
 
     //can add for new fields in user ie) FNAME and LNAME
+    // --accepts JSON format of data for email, password, and role;
     app.put('/api/users/:id', function (req, res){
         return UserModel.findById(req.params.id, function (err, user) {
             if(req.body.email){
@@ -184,10 +188,8 @@ module.exports = function(app, passport) {
         });
     });
 
-
-
     // =====================================
-    // /API/USERS ACCESS FUNCTIONS ==========
+    // /API/USERS ACCESS FUNCTIONS +========
     // =====================================
 
     //API CALL TO CREATE A NEW USER
