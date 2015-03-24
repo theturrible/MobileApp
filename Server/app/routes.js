@@ -2,7 +2,7 @@
 module.exports = function(app, passport) {
 
     var UserModel          = require('../app/models/user_web');
-    //var UserModel            = require('../app/models/user');
+    var CourseModel        = require('../app/models/course');
 
     // =====================================
     // Web-based user account access =======
@@ -82,7 +82,7 @@ module.exports = function(app, passport) {
     app.get('/api/users', function (req, res){
         return UserModel.find(function (err, users) {
         if (!err) {
-            return res.send(users);
+            return res.send(200, users);
         } else {
             return res.send(err);
         }
@@ -117,7 +117,7 @@ module.exports = function(app, passport) {
     app.get('/api/users/:id', function (req, res){
         return UserModel.findById(req.params.id, function (err, user) {
             if (!err) {
-                return res.send(user);
+                return res.send(200, user);
             } else {
                 return res.send(err);
             }
@@ -162,7 +162,7 @@ module.exports = function(app, passport) {
                 return user.save(function (err) {
                     if (!err) {
                         //console.log("updated");
-                        return res.send(user);
+                        return res.send(200, user);
                     } else {
                         //console.log(err);
                         return res.send(err);
@@ -179,7 +179,7 @@ module.exports = function(app, passport) {
             return user.remove(function (err) {
             if (!err) {
                 //console.log("removed");
-                return res.send('user removed');
+                return res.send(200, 'user removed');
             } else {
                 console.log(err);
                 return res.send(err);
@@ -189,7 +189,84 @@ module.exports = function(app, passport) {
     });
 
     // =====================================
-    // /API/USERS ACCESS FUNCTIONS +========
+    // /API/COURSES ========================
+    // =====================================
+
+    //GET ALL COURSES
+    // --returns json of all coourses
+    app.get('/api/courses', function (req, res){
+        return CourseModel.find(function (err, courses) {
+        if (!err) {
+            return res.send(200, courses);
+        } else {
+            return res.send(err);
+        }
+        });
+    });
+
+    //POST A NEW COURES
+    //ATENTION: postman json post does not work for whatever reason, if you
+    //          want to post from postman use x-www-form-blahblah u get it
+    //
+    //  --accepts: json format, see below for example
+    //  --returns: course id and information
+    app.post('/api/courses', function (req, res) {
+        var newCourse            = new CourseModel();
+
+        //console.log(req);
+
+        newCourse.name           = req.body.name;
+        newCourse.section        = req.body.section;
+        newCourse.num            = req.body.num;
+        newCourse.professor      = req.body.professor;
+        newCourse.classDays.day1 = req.body.day1;
+        newCourse.classDays.day2 = req.body.day2;
+        newCourse.classDays.day3 = req.body.day3;;
+        newCourse.startTime      = req.body.startTime;
+        newCourse.duration       = req.body.duration
+
+        // save the user
+        newCourse.save(function(err) {
+            if (err)
+                return err;
+            return newCourse;
+        });
+
+        return res.send(200, newCourse);
+    });
+
+    //DELETE A COURSE BY ID
+    //  --accepts id as url parameter
+    //  --returns success or err
+    app.delete('/api/courses/:id', function (req, res) {
+        return CourseModel.findById(req.params.id, function (err, course) {
+            return course.remove(function (err) {
+            if (!err) {
+                //console.log("removed");
+                return res.send(200, 'course removed');
+            } else {
+                //console.log(err);
+                return res.send(err);
+            }
+            });
+        });
+    });
+    /* {
+    //JSON template for creating a new course
+
+    "name":"Mobile Application Development",
+    "section":"CMSC",
+    "num":"491",
+    "professor": "550b1179174221f00a084c57",
+    "day1":"Tuesday",
+    "day2":"Thursday",
+    "startTime":"2:00PM",
+    "duration":"75"
+
+}*/
+
+    // =====================================
+    // /API/USERS ACCESS FUNCTIONS =========
     // =====================================
 
     //API CALL TO CREATE A NEW USER
