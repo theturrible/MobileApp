@@ -93,9 +93,9 @@ module.exports = function(app, passport, jwt) {
     app.get('/api/users', function (req, res){
         return UserModel.find(function (err, users) {
         if (!err) {
-            return res.send(200, users);
+            return res.send(users);
         } else {
-            return res.send(err);
+            return res.json({status : "error in find"});
         }
         });
     });
@@ -130,7 +130,7 @@ module.exports = function(app, passport, jwt) {
             if (!err) {
                 return res.send(200, user);
             } else {
-                return res.send(err);
+                return res.json({status : "error in findbyid"});;
             }
         });
     });
@@ -173,10 +173,10 @@ module.exports = function(app, passport, jwt) {
                 return user.save(function (err) {
                     if (!err) {
                         //console.log("updated");
-                        return res.send(200, user);
+                        return res.send(user);
                     } else {
                         //console.log(err);
-                        return res.send(err);
+                        return res.json({status : "error in save"});
                     }
                 });
         });
@@ -190,10 +190,9 @@ module.exports = function(app, passport, jwt) {
             return user.remove(function (err) {
             if (!err) {
                 //console.log("removed");
-                return res.send(200, 'user removed');
+                return res.json({status : true});
             } else {
-                console.log(err);
-                return res.send(err);
+                return res.json({status : "error in remove"});
             }
             });
         });
@@ -208,9 +207,9 @@ module.exports = function(app, passport, jwt) {
     app.get('/api/courses', function (req, res){
         return CourseModel.find(function (err, courses) {
         if (!err) {
-            return res.send(200, courses);
+            return res.send(courses);
         } else {
-            return res.send(err);
+            return res.json({status : "error in find"});
         }
         });
     });
@@ -236,10 +235,10 @@ module.exports = function(app, passport, jwt) {
         // save the user
         newCourse.save(function(err, course) {
             if (err)
-                return err;
+                return res.json({status:'error in save'});
         });
 
-        return res.send(200, newCourse);
+        return res.send(newCourse);
     });
     /* 
     //JSON template for creating a new course
@@ -266,15 +265,14 @@ module.exports = function(app, passport, jwt) {
             try{
                 return course.remove(function (err) {
                     if (!err) {
-                        //console.log("removed");
-                        return res.send(200, 'course removed');
+                        return res.json({status : true})
                     } else {
                         //console.log(err);
-                        return res.send(400);
+                        return res.json({status : 'error in remove'});
                     }
                 });
             }catch(err){
-                return res.send(400);
+                return res.json({status : 'error caught in delete'});
             }
         });
     });
