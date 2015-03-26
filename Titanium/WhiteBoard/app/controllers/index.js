@@ -18,8 +18,7 @@ var httpClient = Ti.Network.createHTTPClient({
 httpClient.onload = function(){
 //actual code
 	var res = httpClient.responseText; 
-	Titanium.API.log(res);
-	alert(res);
+	Titanium.API.log("Currecnt login status: " + res);
 	if(res == "true"){
 		Alloy.createController('dashboard').getView()
 	}else{
