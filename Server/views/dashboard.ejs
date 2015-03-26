@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+	<% include head_dash %>
+</head>
+<header>
+	<% include header_dash %>
+</header>
+<body>
+<div class="container">
+
+    <div class="page-header text-center">
+        <h1><span class="fa fa-book"></span> My Courses</h1>
+    </div>
+
+    <div class="row">
+
+        <!-- LOCAL INFORMATION -->
+        <div class="col-sm-6">
+            <div class="well">
+                <h3><span class="fa fa-user"></span> Local</h3>
+
+                    <p>
+                        <strong>id</strong>: <%= user._id %><br>
+                        <strong>email</strong>: <%= user.local.email %><br>
+                        <strong>password</strong>: <%= user.local.password %>
+                    </p>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<footer>
+    <% include footer_dash %>
+</footer>
+</body>
+</html>

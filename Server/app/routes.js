@@ -1,8 +1,12 @@
 // app/routes.js
-module.exports = function(app, passport) {
+module.exports = function(app, passport, jwt) {
 
     var UserModel          = require('../app/models/user_web');
     var CourseModel        = require('../app/models/course');
+    var AuthModel          = require('../app/models/auth');
+    
+    //some time crap idk it works
+    var moment = require('moment');
 
     // =====================================
     // Web-based user account access =======
@@ -22,11 +26,12 @@ module.exports = function(app, passport) {
     app.get('/login', function(req, res) {
 
         // render the page and pass in any flash data if it exists
-        res.render('login.ejs', { message: req.flash('loginMessage') });
+        res.render('login.ejs', { message: req.flash('loginMessage') }); 
     });
 
     app.post('/login',  passport.authenticate('local-login', {
-        successRedirect : '/profile', // redirect to the secure profile section
+        //successRedirect : '/profile', // redirect to the secure profile section
+        successRedirect : '/dashboard', // redirect to the secure profile section
         failureRedirect : '/login', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
@@ -53,8 +58,14 @@ module.exports = function(app, passport) {
     // =====================================
     // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
-    app.get('/profile', isProf, isLoggedIn, function(req, res) {
+    app.get('/profile', isLoggedIn, isProf, function(req, res) {
         res.render('profile.ejs', {
+            user : req.user // get the user out of session and pass to template
+        });
+    });
+
+    app.get('/dashboard', isLoggedIn, isProf, function(req, res) {
+        res.render('dashboard.ejs', {
             user : req.user // get the user out of session and pass to template
         });
     });
@@ -82,9 +93,9 @@ module.exports = function(app, passport) {
     app.get('/api/users', function (req, res){
         return UserModel.find(function (err, users) {
         if (!err) {
-            return res.send(200, users);
+            return res.send(users);
         } else {
-            return res.send(err);
+            return res.json({status : "error in find"});
         }
         });
     });
@@ -119,7 +130,7 @@ module.exports = function(app, passport) {
             if (!err) {
                 return res.send(200, user);
             } else {
-                return res.send(err);
+                return res.json({status : "error in findbyid"});;
             }
         });
     });
@@ -162,10 +173,10 @@ module.exports = function(app, passport) {
                 return user.save(function (err) {
                     if (!err) {
                         //console.log("updated");
-                        return res.send(200, user);
+                        return res.send(user);
                     } else {
                         //console.log(err);
-                        return res.send(err);
+                        return res.json({status : "error in save"});
                     }
                 });
         });
@@ -179,10 +190,9 @@ module.exports = function(app, passport) {
             return user.remove(function (err) {
             if (!err) {
                 //console.log("removed");
-                return res.send(200, 'user removed');
+                return res.json({status : true});
             } else {
-                console.log(err);
-                return res.send(err);
+                return res.json({status : "error in remove"});
             }
             });
         });
@@ -197,9 +207,9 @@ module.exports = function(app, passport) {
     app.get('/api/courses', function (req, res){
         return CourseModel.find(function (err, courses) {
         if (!err) {
-            return res.send(200, courses);
+            return res.send(courses);
         } else {
-            return res.send(err);
+            return res.json({status : "error in find"});
         }
         });
     });
@@ -225,11 +235,27 @@ module.exports = function(app, passport) {
         // save the user
         newCourse.save(function(err, course) {
             if (err)
-                return err;
+                return res.json({status:'error in save'});
         });
 
-        return res.send(200, newCourse);
+        return res.send(newCourse);
     });
+    /* 
+    //JSON template for creating a new course
+    {
+        "name":"Mobile Application Development",
+        "section":"CMSC",
+        "num":"491",
+        "professor": "550b1179174221f00a084c57",
+        "day1":"Tuesday",
+        "day2":"Thursday",
+        "startTime":"2:00PM",
+        "duration":"75"
+    }
+    */
+
+    //UPDATE A COURSE
+
 
     //DELETE A COURSE BY ID
     //  --accepts id as url parameter
@@ -239,31 +265,17 @@ module.exports = function(app, passport) {
             try{
                 return course.remove(function (err) {
                     if (!err) {
-                        //console.log("removed");
-                        return res.send(200, 'course removed');
+                        return res.json({status : true})
                     } else {
                         //console.log(err);
-                        return res.send(400);
+                        return res.json({status : 'error in remove'});
                     }
                 });
             }catch(err){
-                return res.send(400);
+                return res.json({status : 'error caught in delete'});
             }
         });
     });
-    /* {
-    //JSON template for creating a new course
-
-    "name":"Mobile Application Development",
-    "section":"CMSC",
-    "num":"491",
-    "professor": "550b1179174221f00a084c57",
-    "day1":"Tuesday",
-    "day2":"Thursday",
-    "startTime":"2:00PM",
-    "duration":"75"
-
-}*/
 
     // =====================================
     // /API/USERS ACCESS FUNCTIONS =========
@@ -271,55 +283,130 @@ module.exports = function(app, passport) {
 
     //API CALL TO CREATE A NEW USER
     // --accepts: JSON -> {"email":"user_email","password":"user_password(plain text),"role":"student or professor(depends on login location: app- student, web-professor)"}
-    // --returns 'id' in JSON or unauthorized if it fails.
-    app.post('/api/signup', passport.authenticate('local-signup'),
-        function(req, res) {
-            //res.json({ id: req.user.id, email: req.user.email });
-            //returns id if successful
-            res.json({ id: req.user.id });
+    // --returns auth token and 'id' in JSON if good
+    app.post('/api/signup', function(req, res, next) {
+      passport.authenticate('local-signup', {session: false }, function(err, user, info) {
+        if (err) { return res.json({status:"error in authentication"}) }
+        if (!user) {
+            return res.json({ status: 'no user' });
         }
-    );
+
+        var expire = moment().add(7 ,'days').valueOf();
+
+        //user has authenticated correctly thus we create a JWT token 
+        //can set expiration in .encode if we need
+        var token = jwt.encode({ username: user.local.email, expire: expire }, app.get('tokenSecret'));
+
+        var auth            = new AuthModel();
+
+        //console.log(req);
+        auth.user_id =  user.id;
+        auth.code    =  token;
+
+        // save the user
+        auth.save(function(err) {
+            if (err)
+                return res.json({status: "mongo save error"});
+        });
+
+        res.json({auth: token, id: user.id});
+
+
+      })(req, res, next);
+    });
 
     //API CALL TO LOGIN A USER
     // --accepts: JSON -> {"email":"user_email","password":"user_password(plain text)}
-    // --returns 'id' in JSON or unauthorized if it fails.
-    app.post('/api/login', passport.authenticate('local-login'),
-        function(req, res) {
-            //res.json({ id: req.user.id, email: req.user.email });
-            //returns id if successful
-            //console.log(req.user.local.email);
-            res.json({ id: req.user.id });
-        }
-    );
+    // --returns  auth token and 'id' in JSON if good
 
-    // --returns true if the user who ade api call is logged in on server side session, false otherwise or not logged in.
-    app.get('/api/logged', function(req, res){
-        var id = req.user.id;
-        
+    app.post('/api/login', function(req, res, next) {
+      passport.authenticate('local-login', {session: false }, function(err, user, info) {
+        if (err) { return next(err) }
+        if (!user) {
+            return res.json(401, { status: 'false' });
+        }
+
+        var expire = moment().add(7 ,'days').valueOf();
+
+        //user has authenticated correctly thus we create a JWT token 
+        //can set expiration in .encode if we need
+        var token = jwt.encode({ username: user.local.email, expire: expire }, app.get('tokenSecret'));
+
+        var auth            = new AuthModel();
 
         //console.log(req);
-        if(req.isAuthenticated())
-            //console.log(req.user.local.email);
-            return res.send(true);
-        return res.send(false);
+        auth.user_id =  user.id;
+        auth.code    =  token;
+
+        // save the user
+        auth.save(function(err) {
+            if (err)
+                return res.json({status: "mongo save error"});
+        });
+
+        res.json({auth: token, id: user.id});
+
+      })(req, res, next);
     });
 
-    // --returns true if logout of user who made api call is logged out, false otherwise.
-    app.get('/api/logout', function(req, res) {
-        try{
-            //console.log(req.user.local.email);
-            req.logout();
-        }catch(err){
-            return res.send(err);
+
+    //CHECK IF USER IS LOGGED IN
+    //  --accepts json of auth token
+    //  --returns true if active or false if not
+    app.post('/api/logged', function(req, res){
+
+        AuthModel.findOne({ 'code' : req.body.auth } , function (err, auth) {
+              if (err) { return res.json({ status : "error: error in findOne()"}) }
+              if (!auth) {
+                 return res.json({ status : "false" });
+              }
+              else {
+                var decoded = jwt.decode(req.body.auth, app.get('tokenSecret'));
+                if(decoded.expire > moment().valueOf())
+                    return res.json({status: 'true'});
+                return res.json({status: 'false'});
+              }
+        });         
+    });
+
+    //LOGOUT A USER
+    // --accepts json of auth token
+    // --returns true if success logout
+    app.post('/api/logout', function(req, res) {
+        AuthModel.findOne({ 'code' : req.body.auth } , function (err, auth) {
+            try{
+                return auth.remove(function (err) {
+                    if (!err) {
+                        //console.log("removed");
+                        return res.json({status: 'true'});
+                    } else {
+                        //console.log(err);
+                        return res.json({status: 'error in remove'});
+                    }
+                });
+            }catch(err){
+                return res.json({error: 'caught error in remove'});
+            }
+        });
+    });
+
+    //GET ALL AUTH TOKENS
+    // need to set admin role for this
+    app.get('/api/auths', function (req, res){
+        return AuthModel.find(function (err, auths) {
+        if (!err) {
+            return res.send(auths);
+        } else {
+            return res.json({error: 'err in find'});
         }
-        return res.send(true);
+        });
     });
 }
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
 
-    // if user is authenticated in the session, carry on
+    // if user is authenticated in the session, carry on 
     if (req.isAuthenticated())
         return next();
 
@@ -327,9 +414,10 @@ function isLoggedIn(req, res, next) {
     res.redirect('/');
 }
 
-function isProf(req,res,next) {
-    if(req.user.role === "professor")
-        return next();
+function isProf(req, res, next) {
+    if(req.user.role)
+        if(req.user.role === "professor")
+            return next();
    // res.redirect('/login');
-   res.render('login.ejs', { message: 'Only professors may use the Web App' });
+   res.render('login.ejs', { message: 'Only professors may use the Web App' }); 
 }
