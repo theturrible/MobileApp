@@ -8,32 +8,35 @@
 </header>
 <body>
 <div class="container">
-
-    <div class="page-header text-center">
-        <h1><span class="fa fa-book"></span> My Courses</h1>
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+        <% if (message.length > 0) { %>
+            <div class="alert alert-danger"><%= message %></div>
+        <% } %>
+        </div>
     </div>
 
+    <div class="page-header text-center">
+        <h1><span class="fa fa-book"></span> My Courses<span class="badge"></span></h1>
+    </div>
+
+    <!-- show any messages that come back with authentication -->
     <div class="row">
+        <div class="col-sm-6 col-sm-offset-3" >
+            <% for(var i=0; i < course.length; i++) { %>
+                <button type="button" class="courseBtn btn btn-default btn-lg" style="background: white; word-break: break-all;">
+                    <%= course[i].section %> <%= course[i].num %> - <%= course[i].name %> <span class="badge pull-right"> <%= course[i].startTime %> </span>
+                </button>
+            <% } %>
 
-        <!-- LOCAL INFORMATION -->
-        <div class="col-sm-6">
-            <div class="well">
-                <h3><span class="fa fa-user"></span> Local</h3>
+           <!-- <button type="button" class="courseBtn btn btn-default btn-lg" style="background: white;">Add a Course</button> -->
 
-                    <p>
-                        <strong>id</strong>: <%= user._id %><br>
-                        <strong>email</strong>: <%= user.local.email %><br>
-                        <strong>password</strong>: <%= user.local.password %>
-                    </p>
-
-            </div>
         </div>
-
     </div>
 
 </div>
+</body>
 <footer>
     <% include footer_dash %>
 </footer>
-</body>
 </html>

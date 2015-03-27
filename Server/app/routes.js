@@ -48,7 +48,8 @@ module.exports = function(app, passport, jwt) {
 
     // process the signup form
     app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/profile', // redirect to the secure profile section
+        //successRedirect : '/profile', // redirect to the secure profile section
+        successRedirect : '/dashboard', // redirect to the secure profile section
         failureRedirect : '/signup', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
@@ -65,8 +66,21 @@ module.exports = function(app, passport, jwt) {
     });
 
     app.get('/dashboard', isLoggedIn, isProf, function(req, res) {
-        res.render('dashboard.ejs', {
-            user : req.user // get the user out of session and pass to template
+        return CourseModel.find({'professor': req.user.id }, function(err, course){
+            if(err) 
+                throw err;
+            res.render('dashboard.ejs', {
+                course: course,
+                user : req.user,  //get the user out of session and pass to template
+                message : req.flash('dashMessage')
+            });
+        });
+    });
+
+    app.get('/AddCourse', isLoggedIn, isProf, function(req, res) {
+        res.render('AddCourse.ejs', {
+            user : req.user, // get the user out of session and pass to template
+            message : req.flash('addCourseMessage')
         });
     });
 
@@ -240,6 +254,18 @@ module.exports = function(app, passport, jwt) {
 
         return res.send(newCourse);
     });
+
+
+    //GET COURSE BY PROFESSORS USER ID
+    // --accepts role and user id
+    // 
+    app.post('/api/courses/byProf', function (req, res){
+        return CourseModel.find({'professor': req.body.profId}, function(err, course){
+            if(err) 
+                return res.json({ status : false });
+            return res.send(course);
+        });
+    });
     /* 
     //JSON template for creating a new course
     {
@@ -253,8 +279,19 @@ module.exports = function(app, passport, jwt) {
         "duration":"75"
     }
     */
+    //GET A COURSE BY ID
+    app.get('/api/courses/:id', function (req, res){
+        return CourseModel.findById(req.params.id, function (err, course) {
+            if (!err) {
+                return res.send(course);
+            } else {
+                return res.json({status : "error in findbyid"});;
+            }
+        });
+    });
 
     //UPDATE A COURSE
+   
 
 
     //DELETE A COURSE BY ID
@@ -420,4 +457,9 @@ function isProf(req, res, next) {
             return next();
    // res.redirect('/login');
    res.render('login.ejs', { message: 'Only professors may use the Web App' }); 
+}
+
+function profCourses(req, res, next){
+    var CourseModel        = require('../app/models/course');
+
 }

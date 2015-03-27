@@ -5,3 +5,9 @@ footer {
  	height: 60px;
 	background: gray;
 }
+
+.courseBtn {
+	background: white;
+	width: 100%;
+	margin-bottom: 5%;
+}
