@@ -9,7 +9,9 @@ var courseSchema = mongoose.Schema({
 	classDays	: 	{
 						day1	: 	String,	// ie)Monday
 						day2	: 	String,	// ie)Wednesday
-						day3 	: 	String	// ie)Friday
+						day3 	: 	String, // ie)Friday
+						day4 	: 	String,
+						day5 	: 	String	
 					},
 	startTime 	: 	String,	// ie)2:00pm
 	duration 	: 	Number // ie) 75 - in minutes

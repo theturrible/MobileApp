@@ -89,6 +89,37 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
+    app.post('/AddCourse', isLoggedIn, isProf, function(req, res) {
+
+        var newCourse            = new CourseModel();
+
+        //console.log(req);
+
+        newCourse.name           = req.body.name;
+        newCourse.section        = req.body.section;
+        newCourse.num            = req.body.num;
+        newCourse.professor      = req.body.professor;
+        newCourse.classDays.day1 = req.body.day1;
+        newCourse.classDays.day2 = req.body.day2;
+        newCourse.classDays.day3 = req.body.day3;
+        newCourse.startTime      = req.body.startTime;
+        newCourse.duration       = req.body.duration;
+
+        // save the user
+        newCourse.save(function(err, course) {
+            if (err) {
+                res.render('AddCourse.ejs', {
+                    user : req.user, // get the user out of session and pass to template
+                    message : 'Failed to add course'
+                });
+            }else{
+                 res.redirect('/dashboard');
+            }
+        });
+    });
+
+
+
     // =====================================
     // LOGOUT ==============================
     // =====================================
@@ -424,7 +455,6 @@ module.exports = function(app, passport, jwt) {
     //  --accepts json of auth token
     //  --returns true if active or false if not
     app.post('/api/logged', function(req, res){
-
         AuthModel.findOne({ 'code' : req.body.auth } , function (err, auth) {
               if (err) { return res.json({ status : "error: error in findOne()"}) }
               if (!auth) {
