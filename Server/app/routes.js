@@ -91,6 +91,8 @@ module.exports = function(app, passport, jwt) {
 
     app.post('/AddCourse', isLoggedIn, isProf, function(req, res) {
 
+        console.log(req.body);
+
         var newCourse            = new CourseModel();
 
         //console.log(req);
@@ -99,9 +101,23 @@ module.exports = function(app, passport, jwt) {
         newCourse.section        = req.body.section;
         newCourse.num            = req.body.num;
         newCourse.professor      = req.body.professor;
-        newCourse.classDays.day1 = req.body.day1;
-        newCourse.classDays.day2 = req.body.day2;
-        newCourse.classDays.day3 = req.body.day3;
+        
+        if(req.body.day1){
+            newCourse.classDays.day1 = 'Monday';
+        }
+        if(req.body.day2){
+            newCourse.classDays.day2 = 'Tuesday';
+        }
+        if(req.body.day3){
+            newCourse.classDays.day3 = 'Wednesday';
+        }
+        if(req.body.day4){
+            newCourse.classDays.day4 = 'Thursday';
+        }
+        if(req.body.day5){
+            newCourse.classDays.day5 = 'Friday';
+        }
+        
         newCourse.startTime      = req.body.startTime;
         newCourse.duration       = req.body.duration;
 
