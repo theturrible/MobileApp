@@ -2,6 +2,8 @@
 // load the things we need
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
+ObjectId = mongoose.Schema.ObjectId
+
 
 // define the schema for our user model
 var userSchema = mongoose.Schema({
@@ -30,8 +32,8 @@ var userSchema = mongoose.Schema({
         token        : String,
         email        : String,
         name         : String
-    }
-
+    },
+    courses          : [{ id    :   String}]
 });
 
 // methods ======================

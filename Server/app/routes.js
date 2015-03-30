@@ -12,12 +12,14 @@ module.exports = function(app, passport, jwt) {
     // Web-based user account access =======
     // =====================================
 
+
     // =====================================
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
         res.render('index_3.ejs'); // load the index.ejs file
     });
+
 
     // =====================================
     // LOGIN ===============================
@@ -29,6 +31,7 @@ module.exports = function(app, passport, jwt) {
         res.render('login.ejs', { message: req.flash('loginMessage') }); 
     });
 
+    //post for login authentication
     app.post('/login',  passport.authenticate('local-login', {
         //successRedirect : '/profile', // redirect to the secure profile section
         successRedirect : '/dashboard', // redirect to the secure profile section
@@ -65,6 +68,7 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
+    //Get the dashboard if logged in and are a Professor
     app.get('/dashboard', isLoggedIn, isProf, function(req, res) {
         return CourseModel.find({'professor': req.user.id }, function(err, course){
             if(err) 
@@ -77,6 +81,7 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
+    //Get the addcourse page
     app.get('/AddCourse', isLoggedIn, isProf, function(req, res) {
         res.render('AddCourse.ejs', {
             user : req.user, // get the user out of session and pass to template
@@ -87,6 +92,7 @@ module.exports = function(app, passport, jwt) {
     // =====================================
     // LOGOUT ==============================
     // =====================================
+    //Logout of web session
     app.get('/logout', function(req, res) {
         req.logout();
         res.redirect('/');
@@ -114,27 +120,6 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
-    //CREATE A NEW USER
-    //commented this out but leaving for reference. USE /API/SIGNUP
-    /*
-    app.post('/api/users', function (req, res) {
-        var newUser            = new UserModel();
-
-        // set the user's local credentials
-        newUser.local.email    = req.body.email;
-        newUser.local.password = req.body.password;
-        newUser.role           = req.body.role;
-
-        // save the user
-        newUser.save(function(err) {
-            if (err)
-                throw err;
-                    return done(null, newUser);
-        });
-
-        return res.send(newUser);
-    });
-    */
 
     //GET USER BY ID
     // --accepts _id of user as url extension
@@ -149,21 +134,6 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
-    /*
-    Example of getting a model by where email = req.body.email
-    app.post('/api/users/login', function (req, res){
-        console.log(req.body.email);
-        return UserModel.findOne({'local.email': req.body.email}, function(err, user){
-            if (!err) {
-                console.log("FOUND: " + user.local.password);
-            } else {
-                console.log(err);
-            }
-            return res.send(user);
-        });
-    });
-    */
-
     //UPDATE USER BY ID
     // --accepts ID as url parameter
     // --returns updated user json data if successful, else returns the err.
@@ -176,6 +146,14 @@ module.exports = function(app, passport, jwt) {
                 user.local.email = req.body.email;
             }
 
+            if(req.body.FName){
+                user.FName = req.body.FName;
+            }
+
+            if(req.body.LName){
+                user.LName = req.body.LName;
+            }
+
             if(req.body.password){
                 user.local.password = user.generateHash(req.body.password);
             }
@@ -184,15 +162,19 @@ module.exports = function(app, passport, jwt) {
                  user.role = req.body.role;
             }
 
-                return user.save(function (err) {
-                    if (!err) {
-                        //console.log("updated");
-                        return res.send(user);
-                    } else {
-                        //console.log(err);
-                        return res.json({status : "error in save"});
-                    }
-                });
+            if(req.body.courseId){
+                user.courses.push(req.body.courseId);
+            }
+
+            return user.save(function (err) {
+                if (!err) {
+                    //console.log("updated");
+                    return res.send(user);
+                } else {
+                    //console.log(err);
+                    return res.json({status : "error in save"});
+                }
+            });
         });
     });
 
@@ -231,6 +213,20 @@ module.exports = function(app, passport, jwt) {
     //POST A NEW COURES
     //  --accepts: json format, see below for example
     //  --returns: course id and information
+
+     /* 
+    //JSON template for creating a new course
+    {
+        "name":"Mobile Application Development",
+        "section":"CMSC",
+        "num":"491",
+        "professor": "550b1179174221f00a084c57",
+        "day1":"Tuesday",
+        "day2":"Thursday",
+        "startTime":"2:00PM",
+        "duration":"75"
+    }
+    */
     app.post('/api/courses', function (req, res) {
         var newCourse            = new CourseModel();
 
@@ -258,7 +254,7 @@ module.exports = function(app, passport, jwt) {
 
     //GET COURSE BY PROFESSORS USER ID
     // --accepts role and user id
-    // 
+    // --returns json course with professor id ==
     app.post('/api/courses/byProf', function (req, res){
         return CourseModel.find({'professor': req.body.profId}, function(err, course){
             if(err) 
@@ -266,19 +262,7 @@ module.exports = function(app, passport, jwt) {
             return res.send(course);
         });
     });
-    /* 
-    //JSON template for creating a new course
-    {
-        "name":"Mobile Application Development",
-        "section":"CMSC",
-        "num":"491",
-        "professor": "550b1179174221f00a084c57",
-        "day1":"Tuesday",
-        "day2":"Thursday",
-        "startTime":"2:00PM",
-        "duration":"75"
-    }
-    */
+   
     //GET A COURSE BY ID
     app.get('/api/courses/:id', function (req, res){
         return CourseModel.findById(req.params.id, function (err, course) {
@@ -291,8 +275,57 @@ module.exports = function(app, passport, jwt) {
     });
 
     //UPDATE A COURSE
-   
+    app.put('/api/courses/:id', function (req, res){
+        return CourseModel.findById(req.params.id, function (err, course) {
+            if(req.body.name){
+                course.local.name = req.body.name;
+            }
 
+            if(req.body.section){
+                course.section = req.body.section;
+            }
+
+            if(req.body.num){
+                course.num = req.body.num;
+            }
+
+            if(req.body.professor){
+                course.professor = req.body.professor;
+            }
+
+            if(req.body.day1){
+                 course.classDays.day1 = req.body.day1;
+            }
+
+            if(req.body.day2){
+                 course.classDays.day2 = req.body.day2;
+            }
+
+            if(req.body.day3){
+                 course.classDays.day3 = req.body.day3;
+            }
+
+
+            if(req.body.startTime){
+                 course.startTime = req.body.startTime;
+            }
+
+
+            if(req.body.duration){
+                 course.duration = req.body.duration;
+            }
+
+            return course.save(function (err) {
+                if (!err) {
+                    //console.log("updated");
+                    return res.send(course);
+                } else {
+                    //console.log(err);
+                    return res.json({status : "error in save"});
+                }
+            });
+        });
+    });
 
     //DELETE A COURSE BY ID
     //  --accepts id as url parameter
@@ -459,7 +492,44 @@ function isProf(req, res, next) {
    res.render('login.ejs', { message: 'Only professors may use the Web App' }); 
 }
 
-function profCourses(req, res, next){
-    var CourseModel        = require('../app/models/course');
 
-}
+/*
+Code dump
+//CREATE A NEW USER
+    //commented this out but leaving for reference. USE /API/SIGNUP
+    
+    app.post('/api/users', function (req, res) {
+        var newUser            = new UserModel();
+
+        // set the user's local credentials
+        newUser.local.email    = req.body.email;
+        newUser.local.password = req.body.password;
+        newUser.role           = req.body.role;
+
+        // save the user
+        newUser.save(function(err) {
+            if (err)
+                throw err;
+                    return done(null, newUser);
+        });
+
+        return res.send(newUser);
+    });
+    
+
+        
+    Example of getting a model by where email = req.body.email
+    app.post('/api/users/login', function (req, res){
+        console.log(req.body.email);
+        return UserModel.findOne({'local.email': req.body.email}, function(err, user){
+            if (!err) {
+                console.log("FOUND: " + user.local.password);
+            } else {
+                console.log(err);
+            }
+            return res.send(user);
+        });
+    });
+    
+
+*/
