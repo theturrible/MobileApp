@@ -14,7 +14,17 @@ var courseSchema = mongoose.Schema({
 						day5 	: 	String	
 					},
 	startTime 	: 	String,	// ie)2:00pm
-	duration 	: 	Number // ie) 75 - in minutes
+	duration 	: 	Number, // ie) 75 - in minutes
+	announce 	: 	[{
+						body 	: 	String,
+						create 	: 	String
+					}],
+	assign 	 	: 	[{
+						name 	: 	String,
+						body 	: 	String,
+						due 	: 	String,
+						create 	: 	String
+					}]
 
 });
 

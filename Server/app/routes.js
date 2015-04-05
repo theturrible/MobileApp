@@ -89,6 +89,7 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
+    //Post a new course from webapp
     app.post('/AddCourse', isLoggedIn, isProf, function(req, res) {
 
         console.log(req.body);
@@ -101,7 +102,7 @@ module.exports = function(app, passport, jwt) {
         newCourse.section        = req.body.section;
         newCourse.num            = req.body.num;
         newCourse.professor      = req.body.professor;
-        
+
         if(req.body.day1){
             newCourse.classDays.day1 = 'Monday';
         }
@@ -134,7 +135,26 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
-
+    
+    //Get course page by id
+    app.get('/course/:id', isLoggedIn, isProf, function(req, res) {
+        return CourseModel.findById(req.params.id, function (err, course) {
+            console.log()
+            if (!err && course.professor === req.user.id) {
+                res.render('course.ejs', {
+                    user : req.user, // get the user out of session and pass to template
+                    course : course,
+                    message : req.flash('addCourseMessage')
+                });
+            } else {
+                res.render('AddCourse.ejs', {
+                    user : req.user, // get the user out of session and pass to template
+                    message : 'Could not find course'
+                });
+            }
+        });
+    });
+    
 
     // =====================================
     // LOGOUT ==============================
@@ -302,8 +322,8 @@ module.exports = function(app, passport, jwt) {
     //GET COURSE BY PROFESSORS USER ID
     // --accepts role and user id
     // --returns json course with professor id ==
-    app.post('/api/courses/byProf', function (req, res){
-        return CourseModel.find({'professor': req.body.profId}, function(err, course){
+    app.post('/api/courses/student', function (req, res){
+        CourseModel.find({'professor': req.body.profId}, function(err, course){
             if(err) 
                 return res.json({ status : false });
             return res.send(course);
@@ -362,6 +382,11 @@ module.exports = function(app, passport, jwt) {
                  course.duration = req.body.duration;
             }
 
+            if(req.body.announce){
+                req.body.announce.create = moment();
+                course.announce.push(req.body.announce);
+            }
+
             return course.save(function (err) {
                 if (!err) {
                     //console.log("updated");
@@ -393,6 +418,43 @@ module.exports = function(app, passport, jwt) {
             }
         });
     });
+
+    //GET ALL ANNOUNCEMENTS BY A COURSE ID
+    app.get('/api/courses/announce/:id', function (req, res){
+        return CourseModel.findById(req.params.id, function (err, course) {
+            if (!err) {
+                return res.send(course.announce);
+            } else {
+                return res.json({status : "error in findbyid"});
+            }
+        });
+    });
+
+    //Delete an announcement by id
+    //send id of course in params and id of announcement in json under title "announce" : "_id"
+    app.delete('/api/courses/announce/:id', function (req, res) {
+        return CourseModel.findById(req.params.id, function (err, course) {
+            if (!err) {
+                course.announce.pull({ _id : req.body.announce });
+                return course.save(function (err) {
+                    if (!err) {
+                        //console.log("updated");
+                        return res.send(course);
+                    } else {
+                        //console.log(err);
+                        return res.json({status : "error in save"});
+                    }
+                });
+            } else {
+                return res.json({status : "error in findbyid"});
+            }
+        });
+
+        CourseModel.find(function (err, course) {
+            return course.announce.pull({ _id: req.params.id });
+        });
+    });
+
 
     // =====================================
     // /API/USERS ACCESS FUNCTIONS =========

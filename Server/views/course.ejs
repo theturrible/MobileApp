@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+	<% include head_dash %>
+</head>
+<header>
+	<% include header_dash %>
+</header>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+        <% if (message.length > 0) { %>
+            <div class="alert alert-danger"><%= message %></div>
+        <% } %>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <h1> <%= course.section %> <%= course.num %> <br><br> <%= course.name %></h1>
+    </div>
+
+    <!-- show any messages that come back with authentication -->
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="page-header">
+                <h3><span class="fa fa-bullhorn"></span> Announcements <span class="badge"><%= course.announce.length %></span><span class="fa fa-plus-square-o pull-right"></span></h3>
+            </div>
+            <div>
+                <% for(var i=0; i < course.announce.length; i++) { %>
+                    <div class="list-group">
+                        <h4 class="list-group-item-heading"><%= course.announce[i].body %></h4>
+                        <p class="list-group-item-text"><%= course.announce[i].create %></p>
+                    </div>
+                 <% } %>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="page-header">
+                <h3><span class="fa fa-file-text-o"></span> Assignments <span class="badge"></span> <span class="fa fa-plus-square-o pull-right"></span></h3>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="page-header">
+                <h3><span class="fa fa-check-square-o"></span> Check-Ins <span class="badge"></span><span class="fa fa-plus-square-o pull-right"></span></h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+<footer>
+    <% include footer_dash %>
+</footer>
+</html>
