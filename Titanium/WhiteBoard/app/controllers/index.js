@@ -20,14 +20,14 @@ httpClient.onload = function(){
 	var res = httpClient.responseText; 
 	Titanium.API.log("Currecnt login status: " + res);
 	if(res == "true"){
-		Alloy.createController('dashboard').getView()
+		Alloy.createController('dashboard').getView();
 	}else{
 		$.index.open();
 	}
 	
 };
 httpClient.onerror = function(){
-	alert("eRror")
+	alert("Unfortunately, we have encountered an error getting out server to play nice.");
 	$.index.open();
 };
 
@@ -42,7 +42,7 @@ httpClient.send();
 $.btnSignup.addEventListener('click', function(e){ 
 //controller name is 'sample
   	$.index.close();
- 	var signup = Alloy.createController('signup').getView() 
+ 	var signup = Alloy.createController('signup').getView();
    });
 
 
