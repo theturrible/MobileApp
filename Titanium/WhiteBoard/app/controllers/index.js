@@ -1,41 +1,37 @@
+//check if we already have a token saved, if not - open login screen.
+var id = Titanium.App.Properties.getString("user_auth_token", 
+	function(){	
+		Titanium.API.log("Not able to get user_auth_token");
+		$.index.open();		
+	}
+);
 
-
-
-function doClick(e) {
-    alert($.label.text);
-}
-
-
-var id = Titanium.App.Properties.getString("loginID", 
-function(){
-	$.index.open();
-});
-
-var httpClient = Ti.Network.createHTTPClient({
-		timeout: 10000
-});
+var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
 
 httpClient.onload = function(){
-//actual code
-	var res = httpClient.responseText; 
-	Titanium.API.log("Currecnt login status: " + res);
-	if(res == "true"){
+	var res = JSON.parse(httpClient.responseText); 
+	Titanium.API.log("Currecnt login status: " + res.user_auth_token);
+	if(res.user_auth_status == "true"){
 		Alloy.createController('dashboard').getView();
 	}else{
-		$.index.open();
+		if(Titanium.App.Properties.getString("user_auth_token") == null){
+			$.index.open();
+		}else{
+			$.index.open();
+			alert("You have been logged out, please login again.");
+		}	
 	}
-	
 };
+
 httpClient.onerror = function(){
-	alert("Unfortunately, we have encountered an error getting out server to play nice.");
+	Titanium.API.log("Error onLoad auth check.");
 	$.index.open();
 };
 
-httpClient.open('GET', 'http://localhost:8080/api/logged');
+httpClient.open('POST', 'http://localhost:8080/api/logged');
 httpClient.setRequestHeader('Content-Type', 'application/json');
-httpClient.send();
-
-
+var token = Titanium.App.Properties.getString("user_auth_token");
+httpClient.send(JSON.stringify({"user_auth_token": token}));
 
 
 
@@ -45,30 +41,31 @@ $.btnSignup.addEventListener('click', function(e){
  	var signup = Alloy.createController('signup').getView();
    });
 
-
 $.btnLogin.addEventListener('click',function(e)
 {
    Titanium.API.info("Login Button Clicked");
    if($.txtLogin.value == "" || $.txtPass.value == ""){
    	 alert("Please fill out username/password fields");
-	}else{
-	//we gunna call apiii!!!
+	}else{		
+		var httpClient = Ti.Network.createHTTPClient({timeout: 10000});
 		
-		var httpClient = Ti.Network.createHTTPClient(
-			{
-				timeout: 10000
-			}
-		);
 		httpClient.onload = function(){
-			var responseJson = JSON.parse(httpClient.responseText);
-			Titanium.App.Properties.setString("loginID", responseJson.id);			
-			$.index.close();
-			Alloy.createController('dashboard').getView();
-		
+			var respJSON = JSON.parse(httpClient.responseText);
+			if(respJSON.user_auth_status == "true"){
+				//save the two variables we need.
+				Titanium.App.Properties.setString("user_auth_token", respJSON.user_auth_token);
+				Titanium.App.Properties.setString("user_id", respJSON.user_id);
+				Titanium.API.log("Login saved!");
+				$.index.close();
+				Alloy.createController('dashboard').getView();
+			}else{
+				alert("Unable to authenticate, make sure password is valid");
+			}
+						
 		};
 		httpClient.onerror = function(){
-			var responseJson = JSON.parse(httpClient.responseText);
-			Titanium.API.log(responseJson);
+			var respJSON = JSON.parse(httpClient.responseText);
+			Titanium.API.log(respJSON);
 		
 		};
 		httpClient.open('POST', 'http://localhost:8080/api/login');

@@ -187,7 +187,9 @@ module.exports = function(app, passport, jwt) {
 
 
     // =====================================
+    //
     // API =================================
+    //
     // =====================================
 
     // =====================================
@@ -521,7 +523,8 @@ module.exports = function(app, passport, jwt) {
       passport.authenticate('local-login', {session: false }, function(err, user, info) {
         if (err) { return next(err) }
         if (!user) {
-            return res.json(401, { status: 'false' });
+            //failed login return
+            return res.json(401, { user_auth_status: 'false' });
         }
 
         var expire = moment().add(7 ,'days').valueOf();
@@ -530,7 +533,8 @@ module.exports = function(app, passport, jwt) {
         //can set expiration in .encode if we need
         var token = jwt.encode({ username: user.local.email, expire: expire }, app.get('tokenSecret'));
 
-        var auth            = new AuthModel();
+        //return variable
+        var auth = new AuthModel();
 
         //console.log(req);
         auth.user_id =  user.id;
@@ -542,26 +546,39 @@ module.exports = function(app, passport, jwt) {
                 return res.json({status: "mongo save error"});
         });
 
-        res.json({auth: token, id: user.id});
+
+        //Success login return
+        res.json(
+                    {
+                        user_auth_status: "true",
+                        user_auth_token: token, 
+                        user_id: user.id
+                    }
+                );
 
       })(req, res, next);
     });
 
 
-    //CHECK IF USER IS LOGGED IN
+    //  CHECK IF USER IS LOGGED IN
+    //  {
+    //      user_auth_token: "authtoken"    
+    //  } 
+    //
     //  --accepts json of auth token
     //  --returns true if active or false if not
     app.post('/api/logged', function(req, res){
-        AuthModel.findOne({ 'code' : req.body.auth } , function (err, auth) {
-              if (err) { return res.json({ status : "error: error in findOne()"}) }
+        console.log(JSON.stringify(req.body));
+        AuthModel.findOne({ 'code' : req.body.user_auth_token } , function (err, auth) {
+              if (err) { return res.json({ user_auth_status : "error: error in findOne()"}) }
               if (!auth) {
-                 return res.json({ status : "false" });
+                 return res.json({ user_auth_status : "false" });
               }
               else {
-                var decoded = jwt.decode(req.body.auth, app.get('tokenSecret'));
+                var decoded = jwt.decode(req.body.user_auth_token, app.get('tokenSecret'));
                 if(decoded.expire > moment().valueOf())
-                    return res.json({status: 'true'});
-                return res.json({status: 'false'});
+                    return res.json({user_auth_status: 'true'});
+                return res.json({user_auth_status: 'false'});
               }
         });         
     });
