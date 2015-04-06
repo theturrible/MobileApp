@@ -22,10 +22,14 @@ var courseSchema = mongoose.Schema({
 	assign 	 	: 	[{
 						name 	: 	String,
 						body 	: 	String,
-						due 	: 	String,
+						dueDate : 	String,
+						dueTime : 	String,
+						points 	: 	String,
 						create 	: 	String
+					}],
+	students 	: 	[{
+						id 	 	: 	String
 					}]
-
 });
 
 module.exports = mongoose.model('Course', courseSchema);

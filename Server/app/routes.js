@@ -158,9 +158,37 @@ module.exports = function(app, passport, jwt) {
     app.post('/course/announce/:id', isLoggedIn, isProf, function(req, res) {
         return CourseModel.findById(req.params.id, function (err, course) {
 
-            var time = moment();
+            var time = moment().format('LLLL');
             var announce = { 'body': req.body.message, 'create' : time };
             course.announce.push(announce);
+
+            return course.save(function (err) {
+                if (!err) {
+                    //console.log("updated");
+                    return  res.redirect('/course/'+req.params.id);
+                } else {
+                    //console.log(err);
+                    return res.json({status : "error in save"});
+                }
+            });
+        });
+    });
+
+    app.post('/course/assign/:id', isLoggedIn, isProf, function(req, res) {
+        return CourseModel.findById(req.params.id, function (err, course) {
+            var time = moment().format('LLLL');
+            var assign = { 
+                            'name'    : req.body.name, 
+                            'body'    : req.body.body,
+                            'dueDate' : req.body.date,
+                            'dueTime' : req.body.time,
+                            'points'  : req.body.points,
+                            'create'  : time
+                         };
+                         
+            console.log(assign);
+
+            course.assign.push(assign);
 
             return course.save(function (err) {
                 if (!err) {
@@ -470,9 +498,36 @@ module.exports = function(app, passport, jwt) {
                 return res.json({status : "error in findbyid"});
             }
         });
+    });
 
-        CourseModel.find(function (err, course) {
-            return course.announce.pull({ _id: req.params.id });
+    app.get('/api/courses/assign/:id', function (req, res){
+        return CourseModel.findById(req.params.id, function (err, course) {
+            if (!err) {
+                return res.send(course.assign);
+            } else {
+                return res.json({status : "error in findbyid"});
+            }
+        });
+    });
+
+    //Delete an announcement by id
+    //send id of course in params and id of announcement in json under title "announce" : "_id"
+    app.delete('/api/courses/assign/:id', function (req, res) {
+        return CourseModel.findById(req.params.id, function (err, course) {
+            if (!err) {
+                course.assign.pull({ _id : req.body.assign });
+                return course.save(function (err) {
+                    if (!err) {
+                        //console.log("updated");
+                        return res.send(course);
+                    } else {
+                        //console.log(err);
+                        return res.json({status : "error in save"});
+                    }
+                });
+            } else {
+                return res.json({status : "error in findbyid"});
+            }
         });
     });
 
