@@ -154,6 +154,25 @@ module.exports = function(app, passport, jwt) {
             }
         });
     });
+
+    app.post('/course/announce/:id', isLoggedIn, isProf, function(req, res) {
+        return CourseModel.findById(req.params.id, function (err, course) {
+
+            var time = moment();
+            var announce = { 'body': req.body.message, 'create' : time };
+            course.announce.push(announce);
+
+            return course.save(function (err) {
+                if (!err) {
+                    //console.log("updated");
+                    return  res.redirect('/course/'+req.params.id);
+                } else {
+                    //console.log(err);
+                    return res.json({status : "error in save"});
+                }
+            });
+        });
+    });
     
 
     // =====================================

@@ -4,7 +4,7 @@
 	<% include head_dash %>
 </head>
 <header>
-	<% include header_dash %>
+	<% include header_add %>
 </header>
 <body>
 <div class="container">
@@ -16,15 +16,16 @@
         </div>
     </div>
 
-    <div class="text-center">
-        <h1> <%= course.section %> <%= course.num %> <br><br> <%= course.name %></h1>
+    <div class="text-left well">
+        <h1> <%= course.section %> <%= course.num %> <br> <%= course.name %> <br></h1>
+        <h3 class="text-muted"> @ <%= course.startTime %> for <%= course.duration %> min.</h3>
     </div>
 
     <!-- show any messages that come back with authentication -->
     <div class="row">
         <div class="col-sm-4">
             <div class="page-header">
-                <h3><span class="fa fa-bullhorn"></span> Announcements <span class="badge"><%= course.announce.length %></span><span class="fa fa-plus-square-o pull-right"></span></h3>
+                <h3><span class="fa fa-bullhorn"></span> Announcements <span class="badge"><%= course.announce.length %></span><a data-toggle="modal" data-target="#announce"><span class="fa fa-plus-square-o" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
             </div>
             <div>
                 <% for(var i=0; i < course.announce.length; i++) { %>
@@ -37,15 +38,59 @@
         </div>
         <div class="col-sm-4">
             <div class="page-header">
-                <h3><span class="fa fa-file-text-o"></span> Assignments <span class="badge"></span> <span class="fa fa-plus-square-o pull-right"></span></h3>
+                <h3><span class="fa fa-file-text-o"></span> Assignments <span class="badge"></span><a data-toggle="modal" data-target="#myModal"><span class="fa fa-plus-square-o" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
             </div>
         </div>
         <div class="col-sm-4">
             <div class="page-header">
-                <h3><span class="fa fa-check-square-o"></span> Check-Ins <span class="badge"></span><span class="fa fa-plus-square-o pull-right"></span></h3>
+                <h3><span class="fa fa-check-square-o"></span> Check-Ins <span class="badge"></span><a data-toggle="modal" data-target="#announce"><span class="fa fa-plus-square-o" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
             </div>
         </div>
     </div>
+
+<!-- Modal -->
+<div class="modal fade" id="announce" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create an Announcement</h4>
+      </div>
+      <div class="modal-body">
+        <form action='/course/announce/<%= course.id %>' method="post">
+          <div class="form-group">
+            <label for="message" class="control-label">Message:</label>
+            <textarea class="form-control" id="message" name="message"></textarea>
+          </div>
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </div>
 </body>
