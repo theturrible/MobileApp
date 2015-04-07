@@ -2,6 +2,7 @@
 <html>
 <head>
 	<% include head_dash %>
+    <script type="text/javascript" scr="/js/course.js"></script>
 </head>
 <header>
 	<% include header_add %>
@@ -17,13 +18,19 @@
     </div>
 
     <div class="text-left well">
-        <h1> <%= course.section %> <%= course.num %> <br> <%= course.name %> <br></h1>
-        <h3 class="text-muted"> @ <%= course.startTime %> for <%= course.duration %> min.</h3>
+        <div style="display: inline-block;">
+            <h1> <%= course.section %> <%= course.num %> <br> <%= course.name %> <br></h1>
+            <h3 class="text-muted"> @ <%= course.startTime %> for <%= course.duration %> min.</h3>
+        </div>
+        <div style="display: inline-block; float: right;">
+            <a href='/course/checkin/<%= course.id %>' class="btn btn-success"><span class="fa fa-check-square-o"></span> Check-In</a>
+        </div>
     </div>
 
     <!-- show any messages that come back with authentication -->
     <div class="row">
-        <div class="col-sm-4">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-5">
             <div class="page-header">
                 <h3><span class="fa fa-bullhorn"></span> Announcements <a data-toggle="modal" data-target="#announce"><span class="fa fa-plus-square-o" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
             </div>
@@ -35,9 +42,13 @@
                         <p class="list-group-item-text text-muted" style="display: inline-block; margin-right: 10%;">Posted: <%= course.announce[i].create %></p>
                     </div>
                  <% } %>
+                 <% if(course.announce.length < 1) { %>
+                        <p class="text-muted">No Announcements</p>
+                <% } %>
             </div>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-5">
             <div class="page-header">
                 <h3><span class="fa fa-file-text-o"></span> Assignments <span class="badge"></span><a data-toggle="modal" data-target="#assign"><span class="fa fa-plus-square-o" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
             </div>
@@ -52,13 +63,22 @@
                         <p class="list-group-item-text text-muted">Posted: <%= course.assign[j].create %></p>
                     </div>
                  <% } %>
+                 <% if(course.assign.length < 1) { %>
+                        <p class="text-muted">No Assignments</p>
+                <% } %>
             </div>
         </div>
+        <!--
         <div class="col-sm-4">
             <div class="page-header">
                 <h3><span class="fa fa-check-square-o"></span> Check-Ins <span class="badge"></span><a data-toggle="modal" data-target="#myModal"><span class="fa fa-qrcode" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
             </div>
-        </div>
+            <% if(true) { %>
+            <div>
+                <p class="text-muted">No Check-Ins</p>
+            </div>
+            <% } %>
+        </div>-->
     </div>
 
 <!-- Modal Announcement-->

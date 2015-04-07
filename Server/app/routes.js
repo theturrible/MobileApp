@@ -4,6 +4,7 @@ module.exports = function(app, passport, jwt) {
     var UserModel          = require('../app/models/user_web');
     var CourseModel        = require('../app/models/course');
     var AuthModel          = require('../app/models/auth');
+    var CheckInModel       = require('../app/models/checkIn');
     
     //some time crap idk it works
     var moment = require('moment');
@@ -185,7 +186,7 @@ module.exports = function(app, passport, jwt) {
                             'points'  : req.body.points,
                             'create'  : time
                          };
-                         
+
             console.log(assign);
 
             course.assign.push(assign);
@@ -199,6 +200,57 @@ module.exports = function(app, passport, jwt) {
                     return res.json({status : "error in save"});
                 }
             });
+        });
+    });
+
+    app.get('/course/checkin/:id', isLoggedIn, isProf, function(req, res) {
+        return CheckInModel.find({'courseId' : req.params.id }, function (err, checkIn) {
+            if (!err) {
+                res.render('checkin.ejs', {
+                    req  : req,
+                    user : req.user, // get the user out of session and pass to template
+                    checkin : checkIn,
+                    message : req.flash('addCourseMessage')
+                });
+            }
+        });
+    });
+
+    app.post('/course/checkin/:id', isLoggedIn, isProf, function(req, res) {
+       var check = new CheckInModel();
+
+       check.courseId = req.params.id;
+       expire = moment().add(req.body.expire, 'm').format('LLLL');
+       check.expire = expire;
+       check.create = moment().format('LLLL');
+
+       check.save(function (err,check) {
+            if (!err) {
+                var token = jwt.encode({ expire : expire }, app.get('tokenSecret'));
+                check.token = token;
+                check.save(function (err) { 
+                    if(!err){
+                        return res.redirect('/course/checkin/' + check.courseId);
+                    } else {
+                        //console.log(err);
+                        return res.json({status : "error in save"});
+                    }
+                });
+                //console.log("updated");
+            } else {
+                //console.log(err);
+                return res.json({status : "error in save"});
+            }
+        });  
+    });
+
+    app.get('/api/checkin', function (req, res){
+        return CheckInModel.find(function (err, checkIns) {
+        if (!err) {
+            return res.send(checkIns);
+        } else {
+            return res.json({status : "error in find"});
+        }
         });
     });
     
@@ -432,7 +484,7 @@ module.exports = function(app, passport, jwt) {
             }
 
             if(req.body.announce){
-                req.body.announce.create = moment();
+                req.body.announce.create = moment().format('LLLL');;
                 course.announce.push(req.body.announce);
             }
 
@@ -528,6 +580,19 @@ module.exports = function(app, passport, jwt) {
             } else {
                 return res.json({status : "error in findbyid"});
             }
+        });
+    });
+
+    app.post('/api/courses/checkin', function (req, res){
+
+        var decoded = jwt.decode(req.body.user_checkin_token, app.get('tokenSecret'));
+
+
+
+        CheckInModel.find({'professor': req.body.profId}, function(err, course){
+            if(err) 
+                return res.json({ status : false });
+            return res.send(course);
         });
     });
 
