@@ -93,16 +93,15 @@ module.exports = function(app, passport, jwt) {
     //Post a new course from webapp
     app.post('/AddCourse', isLoggedIn, isProf, function(req, res) {
 
-        console.log(req.body);
-
         var newCourse            = new CourseModel();
 
-        //console.log(req);
+        console.log(req.user);
 
         newCourse.name           = req.body.name;
         newCourse.section        = req.body.section;
         newCourse.num            = req.body.num;
         newCourse.professor      = req.body.professor;
+        newCourse.profName       = req.user.local.email;
 
         if(req.body.day1){
             newCourse.classDays.day1 = 'Monday';

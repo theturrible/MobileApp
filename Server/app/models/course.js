@@ -5,7 +5,8 @@ var courseSchema = mongoose.Schema({
 	name		: 	String,	// ie) Mobile App Dev
 	section		: 	String, // ie) CMSC
 	num			: 	Number, // ie) 491
-	professor	: 	String, // ie) 12 byte id generated from mongo for user
+	professor	: 	String,
+	profName	: 	String, // ie) 12 byte id generated from mongo for user
 	classDays	: 	{
 						day1	: 	String,	// ie)Monday
 						day2	: 	String,	// ie)Wednesday
