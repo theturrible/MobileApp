@@ -2,12 +2,38 @@
 <html>
 <head>
 	<% include head_dash %>
+  <link rel="stylesheet" href="/flipclock/compiled/flipclock.css">
   <script type="text/javascript" src="/qrcode/qrcode.js"></script>
   <script type="text/javascript" src="/js/course.js"></script>
+  <script type="text/javascript" src="/flipclock/compiled/flipclock.js"></script>
   <script type="text/javascript">
   $(document).ready(function(){
       <% if(checkin.length > 0){ %>
-          new QRCode(document.getElementById("qrcode"), '<%= checkin[checkin.length-1].token %>');
+          var time = moment();
+          var expire = moment('<%= checkin[checkin.length-1].expire %>');
+
+          //var timeVal = time.valueOf();
+          //var expVal  = expire.valueOf();
+          //var diff = timeVal.diff(expVal);
+          //alert(diff/60000);
+
+          alert('<%= checkin[checkin.length-1].token %>');
+
+          if( time.valueOf() < expire.valueOf() ){
+            $('#qrpanel').removeClass('hidden');
+            new QRCode(document.getElementById("qrcode"), {
+                  text: '<%= checkin[checkin.length-1].token %>',
+                  width: 400,
+                  height: 400,
+                  colorDark : "#000000",
+                  colorLight : "#ffffff",
+                  correctLevel : QRCode.CorrectLevel.H
+             });
+
+            //var clock = $('#clock').FlipClock( diff, {
+                //countdown: true
+            //});
+          }
       <% } %>
   });
   </script>
@@ -37,7 +63,7 @@
     <!-- show any messages that come back with authentication -->
     <div class="row">
         <div class="col-sm-1"></div>
-        <div class="col-sm-5">
+        <div class="col-sm-6">
             <div class="page-header">
                 <h3><span class="fa fa-plus" style="margin-right: 20%;"></span>New Check-In</h3>
             </div>
@@ -50,10 +76,14 @@
                   <br>
                   <button type="submit" class="btn btn-block btn-success" style="  font-size: 200%;">Generate <span class="fa fa-qrcode" style="margin-left: 10%;"></span></button>
                 </form>
-                <div id="qrcode" style="margin: 20%;"></div>
+                <div id="qrpanel" class="hidden">
+                    <div id="qrcode" class="img-responsive" style="margin: 10%;">  
+                    </div>
+                    <!--<button class="btn btn-danger" style="margin-left: 80%;"> Stop</button>-->
+                </div>  
+                <!--<div id="clock" class="img-responsive"></div>-->
             </div>
         </div>
-        <div class="col-sm-1"></div>
         <div class="col-sm-5">
             <div class="page-header">
                 <h3><span class="fa fa-history" style="margin-right: 20%;"></span> Check-In History</h3>
@@ -63,12 +93,23 @@
                         <p class="text-muted">No Check-In's</p>
                 <% } %>
                 <% for(var i = checkin.length; i --> 0; ) { %>
-                    <div class="list-group">
-                        <h3 class="list-group-item-heading"><%= checkin[i].create %></h3>
-                        <h4 class="list-group-item-heading">Expires: <%= checkin[i].expire %></h4>
-                        <h4 class="list-group-item-text text-center" style="display: inline-block; margin-bottom: 5%;"><span class="label label-success" stlye="margin-right: 5%;"><%= checkin[i].students.length %> </span> Checked In</h4>
-                        <br>
-                    </div>
+                     <% if( moment().valueOf() > moment( checkin[i].expire).valueOf() ) { %>
+                        <div class="list-group list-group-item-danger" style="padding: 3%;">
+                            <h3 class="list-group-item-heading"><%= moment(checkin[i].create).format('LLLL') %></h3>
+                            <h4 class="list-group-item-heading">Expired @ <%= moment( checkin[i].expire).format('LT') %></h4>
+                            <h2 class="list-group-item-text" style="margin-left: 10%; display: inline-block; margin-right: 10%;"><span class="label label-default"><%= checkin[i].students.length %></span></h2>
+                            <h2 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%;">Checked In</h2>
+                            <br>
+                        </div>
+                     <% } else { %> 
+                        <div class="list-group list-group-item-success" style="padding: 3%;">
+                            <h3 class="list-group-item-heading"><%= moment(checkin[i].create).format('LLLL') %></h3>
+                            <h4 class="list-group-item-heading">Expires @ <%= moment( checkin[i].expire).format('LT') %></h4>
+                            <h2 class="list-group-item-text" style="margin-left: 10%; display: inline-block; margin-right: 10%;"><span class="label label-primary"><%= checkin[i].students.length %></span></h2>
+                            <h2 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%;">Checked In</h2>
+                            <br>
+                        </div>
+                     <% } %>                   
                  <% } %>
             </div>
         </div>

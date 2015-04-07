@@ -4,6 +4,7 @@ ObjectId = mongoose.Schema.ObjectId;
 var checkInSchema = mongoose.Schema({
 	courseId 	: 	String,
 	token 		: 	String,
+	start  		: 	String,
 	expire 		: 	String,
 	students 	:   [{ 
 						id 		: 	String,

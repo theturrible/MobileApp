@@ -209,7 +209,8 @@ module.exports = function(app, passport, jwt) {
                     req  : req,
                     user : req.user, // get the user out of session and pass to template
                     checkin : checkIn,
-                    message : req.flash('addCourseMessage')
+                    message : req.flash('addCourseMessage'),
+                    moment: moment
                 });
             }
         });
@@ -219,13 +220,13 @@ module.exports = function(app, passport, jwt) {
        var check = new CheckInModel();
 
        check.courseId = req.params.id;
-       expire = moment().add(req.body.expire, 'm').format('LLLL');
+       expire = moment().add(req.body.expire, 'm').format();
        check.expire = expire;
-       check.create = moment().format('LLLL');
+       check.create = moment().format();
 
        check.save(function (err,check) {
             if (!err) {
-                var token = jwt.encode({ expire : expire }, app.get('tokenSecret'));
+                var token = jwt.encode({ expire : expire, id :  check.id }, app.get('tokenSecret'));
                 check.token = token;
                 check.save(function (err) { 
                     if(!err){
@@ -583,16 +584,19 @@ module.exports = function(app, passport, jwt) {
     });
 
     app.post('/api/courses/checkin', function (req, res){
-
+        console.log(req.body.user_checkin_token);
         var decoded = jwt.decode(req.body.user_checkin_token, app.get('tokenSecret'));
-
-
-
-        CheckInModel.find({'professor': req.body.profId}, function(err, course){
-            if(err) 
-                return res.json({ status : false });
-            return res.send(course);
-        });
+        var expire = moment(decoded.expire);
+        console.log(moment().valueOf() + " is now and expire is: " + expire);
+        if(moment().valueOf() < expire.valueOf() ) {
+            CheckInModel.findById(decoded.id , function(err, checkIn){
+                if(err) 
+                    return res.json({ status : false });
+                return res.json({ status : "you are checked in!" });
+            });
+        } else {
+            res.json({ 'status' : 'expired' });
+        }
     });
 
 
