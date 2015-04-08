@@ -12,13 +12,6 @@
           var time = moment();
           var expire = moment('<%= checkin[checkin.length-1].expire %>');
 
-          //var timeVal = time.valueOf();
-          //var expVal  = expire.valueOf();
-          //var diff = timeVal.diff(expVal);
-          //alert(diff/60000);
-
-          alert('<%= checkin[checkin.length-1].token %>');
-
           if( time.valueOf() < expire.valueOf() ){
             $('#qrpanel').removeClass('hidden');
             new QRCode(document.getElementById("qrcode"), {
@@ -29,11 +22,19 @@
                   colorLight : "#ffffff",
                   correctLevel : QRCode.CorrectLevel.H
              });
+            /*
+            time = time.format('ss');
+            expire = expire.format('ss');
+            var dur = time.diff(expire);
 
-            //var clock = $('#clock').FlipClock( diff, {
-                //countdown: true
-            //});
+            alert(dur + "    :  " + time + " ," + expire);
+
+            var clock = $('#clock').FlipClock( dur, {
+                countdown: true
+            });
+            */
           }
+
       <% } %>
   });
   </script>
@@ -81,7 +82,7 @@
                     </div>
                     <!--<button class="btn btn-danger" style="margin-left: 80%;"> Stop</button>-->
                 </div>  
-                <!--<div id="clock" class="img-responsive"></div>-->
+                <div id="clock" class="img-responsive"></div>
             </div>
         </div>
         <div class="col-sm-5">

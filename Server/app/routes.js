@@ -276,23 +276,46 @@ module.exports = function(app, passport, jwt) {
     // /API/USERS ==========================
     // =====================================
 
+
+    //IMPORTANT CHANGE
+    // --Almost All /api/.. request will need to have an auth token supplied in the URL params to verify the request.
+    //      any call below with isAuth middleware will need this!!! 
+    //          -http://url.com/?auth=token     <-- Example
+
+    var isAuth = function (req, res, next){
+        console.log(req.query.auth);
+        AuthModel.findOne({ 'code' : req.query.auth } , function (err, auth) {
+              if (err) { return res.json({ user_auth_status : "error: error in findOne()"}) }
+              if (!auth) {
+                 return res.json({ user_auth_status : "false" });
+              }
+              else {
+                var decoded = jwt.decode(req.query.auth, app.get('tokenSecret'));
+                if(decoded.expire > moment().valueOf())
+                    return next();
+                return res.json({user_auth_status: 'false'});
+              }
+        }); 
+    }
+
+
     //GET ALL USERES
     // --returns all users, needs admin role check
-    app.get('/api/users', function (req, res){
-        return UserModel.find(function (err, users) {
-        if (!err) {
-            return res.send(users);
-        } else {
-            return res.json({status : "error in find"});
-        }
-        });
+    app.get('/api/users', isAuth, function (req, res){
+            return UserModel.find(function (err, users) {
+            if (!err) {
+                return res.send(users);
+            } else {
+                return res.json({status : "error in find"});
+            }
+            });
     });
 
 
     //GET USER BY ID
     // --accepts _id of user as url extension
     // --returns: user schema in json
-    app.get('/api/users/:id', function (req, res){
+    app.get('/api/users/:id', isAuth, function (req, res){
         return UserModel.findById(req.params.id, function (err, user) {
             if (!err) {
                 return res.send(200, user);
@@ -308,7 +331,7 @@ module.exports = function(app, passport, jwt) {
 
     //can add for new fields in user ie) FNAME and LNAME
     // --accepts JSON format of data for email, password, and role;
-    app.put('/api/users/:id', function (req, res){
+    app.put('/api/users/:id', isAuth, function (req, res){
         return UserModel.findById(req.params.id, function (err, user) {
             if(req.body.email){
                 user.local.email = req.body.email;
@@ -349,7 +372,7 @@ module.exports = function(app, passport, jwt) {
     //DELETE A USER BY ID
     //  --accepts ID as url parameter
     //  --returns user as json data, else returns err
-    app.delete('/api/users/:id', function (req, res) {
+    app.delete('/api/users/:id', isAuth, function (req, res) {
         return UserModel.findById(req.params.id, function (err, user) {
             return user.remove(function (err) {
             if (!err) {
@@ -368,7 +391,7 @@ module.exports = function(app, passport, jwt) {
 
     //GET ALL COURSES
     // --returns json of all coourses
-    app.get('/api/courses', function (req, res){
+    app.get('/api/courses', isAuth, function (req, res){
         return CourseModel.find(function (err, courses) {
         if (!err) {
             return res.send(courses);
@@ -395,7 +418,7 @@ module.exports = function(app, passport, jwt) {
         "duration":"75"
     }
     */
-    app.post('/api/courses', function (req, res) {
+    app.post('/api/courses', isAuth, function (req, res) {
         var newCourse            = new CourseModel();
 
         //console.log(req);
@@ -423,7 +446,7 @@ module.exports = function(app, passport, jwt) {
     //GET COURSE BY PROFESSORS USER ID
     // --accepts role and user id
     // --returns json course with professor id ==
-    app.post('/api/courses/student', function (req, res){
+    app.post('/api/courses/student', isAuth, function (req, res){
         CourseModel.find({'professor': req.body.profId}, function(err, course){
             if(err) 
                 return res.json({ status : false });
@@ -432,7 +455,7 @@ module.exports = function(app, passport, jwt) {
     });
    
     //GET A COURSE BY ID
-    app.get('/api/courses/:id', function (req, res){
+    app.get('/api/courses/:id', isAuth, function (req, res){
         return CourseModel.findById(req.params.id, function (err, course) {
             if (!err) {
                 return res.send(course);
@@ -443,7 +466,7 @@ module.exports = function(app, passport, jwt) {
     });
 
     //UPDATE A COURSE
-    app.put('/api/courses/:id', function (req, res){
+    app.put('/api/courses/:id', isAuth, function (req, res){
         return CourseModel.findById(req.params.id, function (err, course) {
             if(req.body.name){
                 course.local.name = req.body.name;
@@ -503,7 +526,7 @@ module.exports = function(app, passport, jwt) {
     //DELETE A COURSE BY ID
     //  --accepts id as url parameter
     //  --returns success or err
-    app.delete('/api/courses/:id', function (req, res) {
+    app.delete('/api/courses/:id', isAuth, function (req, res) {
         return CourseModel.findById(req.params.id, function (err, course) {
             try{
                 return course.remove(function (err) {
@@ -521,7 +544,7 @@ module.exports = function(app, passport, jwt) {
     });
 
     //GET ALL ANNOUNCEMENTS BY A COURSE ID
-    app.get('/api/courses/announce/:id', function (req, res){
+    app.get('/api/courses/announce/:id', isAuth, function (req, res){
         return CourseModel.findById(req.params.id, function (err, course) {
             if (!err) {
                 return res.send(course.announce);
@@ -533,7 +556,7 @@ module.exports = function(app, passport, jwt) {
 
     //Delete an announcement by id
     //send id of course in params and id of announcement in json under title "announce" : "_id"
-    app.delete('/api/courses/announce/:id', function (req, res) {
+    app.delete('/api/courses/announce/:id', isAuth, function (req, res) {
         return CourseModel.findById(req.params.id, function (err, course) {
             if (!err) {
                 course.announce.pull({ _id : req.body.announce });
@@ -552,7 +575,7 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
-    app.get('/api/courses/assign/:id', function (req, res){
+    app.get('/api/courses/assign/:id', isAuth, function (req, res){
         return CourseModel.findById(req.params.id, function (err, course) {
             if (!err) {
                 return res.send(course.assign);
@@ -564,7 +587,7 @@ module.exports = function(app, passport, jwt) {
 
     //Delete an announcement by id
     //send id of course in params and id of announcement in json under title "announce" : "_id"
-    app.delete('/api/courses/assign/:id', function (req, res) {
+    app.delete('/api/courses/assign/:id', isAuth, function (req, res) {
         return CourseModel.findById(req.params.id, function (err, course) {
             if (!err) {
                 course.assign.pull({ _id : req.body.assign });
@@ -583,16 +606,22 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
-    app.post('/api/courses/checkin', function (req, res){
+    //Checks that a qr code token is valid for student check-in
+    app.post('/api/courses/checkin', isAuth, function (req, res){
         console.log(req.body.user_checkin_token);
         var decoded = jwt.decode(req.body.user_checkin_token, app.get('tokenSecret'));
         var expire = moment(decoded.expire);
         console.log(moment().valueOf() + " is now and expire is: " + expire);
         if(moment().valueOf() < expire.valueOf() ) {
-            CheckInModel.findById(decoded.id , function(err, checkIn){
+           CheckInModel.findById(decoded.id , function(err, checkIn){
                 if(err) 
                     return res.json({ status : false });
-                return res.json({ status : "you are checked in!" });
+                var check = { 'id' : req.user.id, 'email' : req.user.local.email };
+                checkIn.students.push(check);
+                checkIn.save(function(err){
+                    if(!err)
+                        return res.json({ status : "you are checked in!" });
+                })
             });
         } else {
             res.json({ 'status' : 'expired' });
@@ -757,6 +786,11 @@ function isProf(req, res, next) {
             return next();
    // res.redirect('/login');
    res.render('login.ejs', { message: 'Only professors may use the Web App' }); 
+}
+
+function isAuth(req, res, token, next){
+    console.log(token);
+    next();
 }
 
 
