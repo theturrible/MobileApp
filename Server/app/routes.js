@@ -95,7 +95,7 @@ module.exports = function(app, passport, jwt) {
 
         var newCourse            = new CourseModel();
 
-        console.log(req.user);
+        //console.log(req.user);
 
         newCourse.name           = req.body.name;
         newCourse.section        = req.body.section;
@@ -139,7 +139,7 @@ module.exports = function(app, passport, jwt) {
     //Get course page by id
     app.get('/course/:id', isLoggedIn, isProf, function(req, res) {
         return CourseModel.findById(req.params.id, function (err, course) {
-            console.log()
+            //console.log()
             if (!err && course.professor === req.user.id) {
                 res.render('course.ejs', {
                     user : req.user, // get the user out of session and pass to template
@@ -186,7 +186,7 @@ module.exports = function(app, passport, jwt) {
                             'create'  : time
                          };
 
-            console.log(assign);
+            //console.log(assign);
 
             course.assign.push(assign);
 
@@ -283,7 +283,7 @@ module.exports = function(app, passport, jwt) {
     //          -http://url.com/?auth=token     <-- Example
 
     var isAuth = function (req, res, next){
-        console.log(req.query.auth);
+        //console.log(req.query.auth);
         AuthModel.findOne({ 'code' : req.query.auth } , function (err, auth) {
               if (err) { return res.json({ user_auth_status : "error: error in findOne()"}) }
               if (!auth) {
@@ -608,10 +608,10 @@ module.exports = function(app, passport, jwt) {
 
     //Checks that a qr code token is valid for student check-in
     app.post('/api/courses/checkin', isAuth, function (req, res){
-        console.log(req.body.user_checkin_token);
+        //console.log(req.body.user_checkin_token);
         var decoded = jwt.decode(req.body.user_checkin_token, app.get('tokenSecret'));
         var expire = moment(decoded.expire);
-        console.log(moment().valueOf() + " is now and expire is: " + expire);
+        //console.log(moment().valueOf() + " is now and expire is: " + expire);
         if(moment().valueOf() < expire.valueOf() ) {
            CheckInModel.findById(decoded.id , function(err, checkIn){
                 if(err) 
@@ -620,11 +620,11 @@ module.exports = function(app, passport, jwt) {
                 checkIn.students.push(check);
                 checkIn.save(function(err){
                     if(!err)
-                        return res.json({ status : "you are checked in!" });
+                        return res.json({ status : true });
                 })
             });
         } else {
-            res.json({ 'status' : 'expired' });
+            res.json({ 'status' : false });
         }
     });
 
@@ -720,7 +720,7 @@ module.exports = function(app, passport, jwt) {
     //  --accepts json of auth token
     //  --returns true if active or false if not
     app.post('/api/logged', function(req, res){
-        console.log(JSON.stringify(req.body));
+        //console.log(JSON.stringify(req.body));
         AuthModel.findOne({ 'code' : req.body.user_auth_token } , function (err, auth) {
               if (err) { return res.json({ user_auth_status : "error: error in findOne()"}) }
               if (!auth) {
@@ -786,11 +786,6 @@ function isProf(req, res, next) {
             return next();
    // res.redirect('/login');
    res.render('login.ejs', { message: 'Only professors may use the Web App' }); 
-}
-
-function isAuth(req, res, token, next){
-    console.log(token);
-    next();
 }
 
 
