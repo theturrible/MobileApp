@@ -1,3 +1,5 @@
+var args = arguments[0] || {};
+
 var NappDrawerModule = require('dk.napp.drawer');
 
 
@@ -53,60 +55,6 @@ function createMenu(){
 	return win;
 }
 
-function createCourseDetails(courseData, prev){
-	
-	var backButton = Ti.UI.createButton({title:"<--"});
-    var wndNewWindow = Ti.UI.createWindow({
-        leftNavButton   : backButton, 
-        title: courseData.section + " " + courseData.num + " " + courseData.name
-    });
-		
-
-	backButton.addEventListener("click", function(){
-		drawer.centerWindow = prev;
-	});
-	
-	
-	if(courseData.announce.length > 0){
-		var courseAnnouncements = courseData.announce;
-		
-		var section1 = Ti.UI.createTableViewSection({
-			headerTitle:'Announcements'
-		});
-		for (var i=0; i < courseAnnouncements.length; i++) {
-			var announcement = courseAnnouncements[i];
-			section1.add(Ti.UI.createTableViewRow({
-				title: announcement.body
-			}));	
-		}
-	}
-	
-	if(courseData.assign.length > 0){
-		var courseAssignments = courseData.assign;
-		
-		var section2 = Ti.UI.createTableViewSection({
-			headerTitle:'Assignments'
-		});
-		for (var i=0; i < courseAssignments.length; i++) {
-			var assignment = courseAssignments[i];
-			section2.add(Ti.UI.createTableViewRow({
-				title: assignment.name
-			}));	
-		}
-	}
-	var table = Ti.UI.createTableView({
-		data:[section1, section2]
-	});
-
-	wndNewWindow.add(table);
-	var navController1 =  Ti.UI.iOS.createNavigationWindow({
-		window : wndNewWindow
-	});
-
-    return navController1;
-		   	 
-}
-
 function createDashboard(){	
 	
 	var rightBtn = Ti.UI.createButton({title:"Right"});
@@ -151,9 +99,29 @@ function createDashboard(){
 		
 		
 		table.addEventListener('click', function(e){
-			var courseContent = createCourseDetails(e.rowData.data, drawer.centerWindow );
-			drawer.centerWindow = courseContent;
+			var backButton = Ti.UI.createButton({title:"<--"});
+			backButton.addEventListener("click", function(){
+				wndNewWindow.close();
+			});
+		    var wndNewWindow = Ti.UI.createWindow({
+		        rightNavButton   : backButton
+		        
+		    });
+			
+			var courseData = e.rowData.data;
+			
+		
+			
+			win.close();
+		    wndNewWindow.open();
+		   	 
+		   
 		});
+		
+		
+		
+		
+		
 		win.add(table);
 	};
 	
