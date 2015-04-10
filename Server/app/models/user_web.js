@@ -11,6 +11,7 @@ var userSchema = mongoose.Schema({
     role             : String,
     FName            : String,
     LName            : String,
+    validated        : String,
     local            : {
         email        : String,
         password     : String

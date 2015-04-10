@@ -10,8 +10,19 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 // load up the user model
 var User            = require('../app/models/user_web');
 
+var nodemailer = require('nodemailer');
+
+// create reusable transporter object using SMTP transport
+var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'whiteboard491@gmail.com',
+        pass: 'vcurams15'
+    }
+});
+
 // expose this function to our app using module.exports
-module.exports = function(passport, jwt) {
+module.exports = function(app, passport, jwt) {
 
     // =========================================================================
     // passport session setup ==================================================
@@ -54,12 +65,14 @@ module.exports = function(passport, jwt) {
 
             // if no user is found, return the message
             if (!user)
-                return done(null, false, req.flash('loginMessage', 'No user found.')); // req.flash is the way to set flashdata using connect-flash
+                return done(null, false, req.flash('loginMessage', 'Invalid Email or password.')); // req.flash is the way to set flashdata using connect-flash
 
             // if the user is found but the password is wrong
             if (!user.validPassword(password))
-                return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
+                return done(null, false, req.flash('loginMessage', 'Invalid Email or password.')); // create the loginMessage and save it to session as flashdata
 
+            if(user.validated === 'false')
+                return done(null, false, req.flash('loginMessage', 'Please check your email for verfication link.'));
             // all is well, return successful user
             return done(null, user);
         });
@@ -100,9 +113,9 @@ module.exports = function(passport, jwt) {
                 // if there is no user with that email
                 var ext = email.split("@")[1];
                 //console.log(ext);
-                if(ext !== 'vcu.edu' && ext !== 'mymail.vcu.edu'){
-                    return done(null, false, req.flash('signupMessage', 'That email is not a VCU domain.'))
-                }else{
+                //if(ext !== 'vcu.edu' && ext !== 'mymail.vcu.edu'){
+                    //return done(null, false, req.flash('signupMessage', 'That email is not a VCU domain.'))
+                //}else{
                     // create the user
                     var newUser            = new User();
 
@@ -110,14 +123,39 @@ module.exports = function(passport, jwt) {
                     newUser.local.email    = email;
                     newUser.local.password = newUser.generateHash(password);
                     newUser.role           = req.body.role;
+                    newUser.validated      = false;
 
                     // save the user
                     newUser.save(function(err) {
                         if (err)
                             throw err;
-                        return done(null, newUser);
+
+                        var token = jwt.encode({ id :  newUser.id }, app.get('tokenSecret'));
+
+                        var textLink = "http://" + req.headers.host + "/verif?token=" + token;
+
+                        var mailOptions = {
+                            from: 'Whiteboard ✔ <whiteboard491@gmail.com>', // sender address
+                            to: email, // list of receivers
+                            subject: 'Whiteboard Email Verification ✔', // Subject line
+                            //text: ,  plaintext body
+                            generateTextFromHTML: true,
+                            html: '<b>Signup Confirmation ✔</b><br />'
+                                + '<a href=\"'+ textLink.toString() + '\">Click here to activate your account.</a>'
+                                + '<br />' 
+                                + '<br /> Text link: ' + textLink
+                            };
+
+                        // send mail with defined transport object
+                        transporter.sendMail(mailOptions, function(error, info){
+                            if(error){
+                                return done(error);
+                            }else{
+                                return done(null, newUser, req.flash('signupMessage','Verification has been sent to your email. Please follow the link to complete registration.'));
+                            }
+                        });
                     });
-                }
+                //}
             }
 
         });

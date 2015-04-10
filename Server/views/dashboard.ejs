@@ -23,24 +23,29 @@
 
     <!-- show any messages that come back with authentication -->
     <div class="row">
-        <div class="col-sm-6 col-sm-offset-3" >
-            <% for(var i=0; i < course.length; i++) { %>
-                <a href='/course/<%= course[i].id %>' class="courseBtn btn btn-default btn-lg" style="background: white; word-break: break-all;">
-                    <%= course[i].section %> <%= course[i].num %> - <%= course[i].name %> <span class="badge pull-right"> <%= course[i].startTime %> </span>
-                </a>
-            <% } %>
-
-            <% if(course.length < 1) { %>
-                <p class="text-muted text-center"><h1>No courses</h1></p>
-            <% } %>
-           <!-- <button type="button" class="courseBtn btn btn-default btn-lg" style="background: white;">Add a Course</button> -->
-
+        <div class="col-sm-6 col-sm-offset-3" style="height: 500px;">
+            <div>
+                <% for(var i=0; i < course.length; i++) { %>
+                    <a href='/course/<%= course[i].id %>' class="courseBtn btn btn-default btn-lg" style="background: white; word-break: break-all;">
+                        <%= course[i].section %> <%= course[i].num %> - <%= course[i].name %> <span class="badge pull-right"> <%= course[i].startTime %> </span>
+                    </a>
+                <% } %>
+            </div>
+            <div>
+                <% if(course.length < 1) { %>
+                    <h1 class="text-muted text-center" style="margin-bottom: 500px;">No courses</h1>
+                <% } %>
+               <!-- <button type="button" class="courseBtn btn btn-default btn-lg" style="background: white;">Add a Course</button> -->
+           </div>
         </div>
     </div>
-
+</div>
+<div class="container">
+    <div class="row">
+        <footer>
+            <% include footer_dash %>
+        </footer>
+    </div>
 </div>
 </body>
-<footer>
-    <% include footer_dash %>
-</footer>
 </html>

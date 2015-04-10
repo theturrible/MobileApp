@@ -16,8 +16,8 @@
             $('#qrpanel').removeClass('hidden');
             new QRCode(document.getElementById("qrcode"), {
                   text: '<%= checkin[checkin.length-1].token %>',
-                  width: 400,
-                  height: 400,
+                  width: 350,
+                  height: 350,
                   colorDark : "#000000",
                   colorLight : "#ffffff",
                   correctLevel : QRCode.CorrectLevel.H

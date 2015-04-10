@@ -9,6 +9,7 @@ module.exports = function(app, passport, jwt) {
     //some time crap idk it works
     var moment = require('moment');
 
+
     // =====================================
     // Web-based user account access =======
     // =====================================
@@ -44,16 +45,24 @@ module.exports = function(app, passport, jwt) {
     // SIGNUP ==============================
     // =====================================
     // show the signup form
-    app.get('/signup', function(req, res) {
+    function confirmPass(req, res, next){
+        if(req.body.compare !== req.body.password){
+            return res.render('signup.ejs', { message : 'Passwords do not match!' });
+        }else{
+            return next();
+        }
+    }
+
+    app.get('/signup', confirmPass ,function(req, res) {
 
         // render the page and pass in any flash data if it exists
         res.render('signup.ejs', { message: req.flash('signupMessage') });
     });
 
     // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
+    app.post('/signup', confirmPass , passport.authenticate('local-signup', {
         //successRedirect : '/profile', // redirect to the secure profile section
-        successRedirect : '/dashboard', // redirect to the secure profile section
+        successRedirect : '/signup', // redirect to the secure profile section
         failureRedirect : '/signup', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
@@ -66,6 +75,24 @@ module.exports = function(app, passport, jwt) {
     app.get('/profile', isLoggedIn, isProf, function(req, res) {
         res.render('profile.ejs', {
             user : req.user // get the user out of session and pass to template
+        });
+    });
+
+    app.get('/verif', function(req, res) {
+        var decoded = jwt.decode(req.query.token, app.get('tokenSecret'));
+
+        UserModel.findById( decoded.id , function(err, user){
+            if(err)
+                return res.send(err);
+            user.validated = true;
+
+            user.save( function(err){
+                if(err)
+                    return res.send(err);
+                res.render('login.ejs', {
+                    message : 'You are now verified and may login'
+                });
+            })
         });
     });
 
@@ -679,7 +706,7 @@ module.exports = function(app, passport, jwt) {
             return res.json(401, { user_auth_status: 'false' });
         }
 
-        var expire = moment().add(7 ,'days').valueOf();
+        var expire = moment().add(1 ,'hour').valueOf();
 
         //user has authenticated correctly thus we create a JWT token 
         //can set expiration in .encode if we need
