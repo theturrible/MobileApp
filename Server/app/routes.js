@@ -9,6 +9,18 @@ module.exports = function(app, passport, jwt) {
     //some time crap idk it works
     var moment = require('moment');
 
+    //node mail module
+    var nodemailer = require('nodemailer');
+
+    // create reusable transporter object using SMTP transport
+    var transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: 'whiteboard491@gmail.com',
+            pass: 'vcurams15'
+        }
+    });
+
 
     // =====================================
     // Web-based user account access =======
@@ -18,7 +30,7 @@ module.exports = function(app, passport, jwt) {
     // =====================================
     // HOME PAGE (with login links) ========
     // =====================================
-    app.get('/', function(req, res) {
+    app.get('/', checkSession, function(req, res) {
         res.render('index_3.ejs'); // load the index.ejs file
     });
 
@@ -27,7 +39,7 @@ module.exports = function(app, passport, jwt) {
     // LOGIN ===============================
     // =====================================
     // show the login form
-    app.get('/login', function(req, res) {
+    app.get('/login', checkSession, function(req, res) {
 
         // render the page and pass in any flash data if it exists
         res.render('login.ejs', { message: req.flash('loginMessage') }); 
@@ -45,7 +57,7 @@ module.exports = function(app, passport, jwt) {
     // SIGNUP ==============================
     // =====================================
     // show the signup form
-    function confirmPass(req, res, next){
+    function confirmPassSU(req, res, next){
         if(req.body.compare !== req.body.password){
             return res.render('signup.ejs', { message : 'Passwords do not match!' });
         }else{
@@ -53,14 +65,26 @@ module.exports = function(app, passport, jwt) {
         }
     }
 
-    app.get('/signup', confirmPass ,function(req, res) {
+    function confirmPassFP(req, res, next){
+        if(req.body.compare !== req.body.password){
+            return res.render('forgot.ejs', { message : 'Passwords do not match!' });
+        }else{
+            return next();
+        }
+    }
+
+   
+
+    app.get('/signup', checkSession ,function(req, res) {
 
         // render the page and pass in any flash data if it exists
         res.render('signup.ejs', { message: req.flash('signupMessage') });
     });
 
+
+
     // process the signup form
-    app.post('/signup', confirmPass , passport.authenticate('local-signup', {
+    app.post('/signup', checkSession, confirmPassSU , passport.authenticate('local-signup', {
         //successRedirect : '/profile', // redirect to the secure profile section
         successRedirect : '/signup', // redirect to the secure profile section
         failureRedirect : '/signup', // redirect back to the signup page if there is an error
@@ -80,19 +104,91 @@ module.exports = function(app, passport, jwt) {
 
     app.get('/verif', function(req, res) {
         var decoded = jwt.decode(req.query.token, app.get('tokenSecret'));
-
+        
         UserModel.findById( decoded.id , function(err, user){
             if(err)
                 return res.send(err);
-            user.validated = true;
+            try{
+                if(user.validated === 'true')
+                        res.render('login.ejs', {
+                            message : 'Already verified! You can login.'
+                        });
+                    user.validated = true;
 
-            user.save( function(err){
+                    user.save( function(err){
+                        if(err)
+                            return res.send(err);
+                        res.render('login.ejs', {
+                            message : 'You are now verified and may login'
+                        });
+                    });
+            }catch(err){
+                res.render('login.ejs', {
+                    message : 'Link Expired'
+                });
+            }
+        });
+        
+    });
+
+    app.get('/forgot', function(req, res) {
+        var decoded = jwt.decode( req.query.token, app.get('tokenSecret'));
+        if(decoded.expire > moment().valueOf())
+            res.render('forgot.ejs', {
+                message : req.flash('loginMessage'),
+                token   : req.query.token
+            });
+        res.render('login.ejs', {
+            message : 'Password reset link expired'
+        });
+    });
+
+    app.post('/forgot',  confirmPassFP , function(req, res) {
+        var decoded = jwt.decode( req.body.token, app.get('tokenSecret'));
+
+        UserModel.findOne({ 'local.email' : decoded.email}, function(err, user){
+            if(err)
+                return res.send(err);
+            user.local.password = user.generateHash(req.body.password);
+
+            user.save(function(err){
                 if(err)
                     return res.send(err);
                 res.render('login.ejs', {
-                    message : 'You are now verified and may login'
+                    message : 'Password has been reset!'
                 });
-            })
+            });
+        });
+    });
+
+    app.post('/login/forgot', function(req, res) {  
+        var expire = moment().add(1, 'day').valueOf();
+
+        var token = jwt.encode({ 'email' : req.body.email, 'expire' : expire }, app.get('tokenSecret'));
+
+        var textLink = "http://" + req.headers.host + "/forgot?token=" + token;
+
+        var mailOptions = {
+            from: 'Whiteboard ✔ <whiteboard491@gmail.com>', // sender address
+            to: req.body.email, // list of receivers
+            subject: 'Whiteboard Password Resest ✔', // Subject line
+            //text: ,  plaintext body
+            generateTextFromHTML: true,
+            html: '<b>Password Reset ✔</b><br />'
+                + '<a href=\"'+ textLink.toString() + '\">Click here to reset your password.</a>'
+                + '<br />' 
+                + '<br /> Text link: ' + textLink
+            };
+
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                return error;
+            }else{
+               res.render('login.ejs', {
+                    message : 'Check your email to reset your password.'
+               });
+            }
         });
     });
 
@@ -805,6 +901,17 @@ function isLoggedIn(req, res, next) {
 
     // if they aren't redirect them to the home page
     res.redirect('/');
+}
+
+// route middleware to make sure a user is logged in
+function checkSession(req, res, next) {
+
+    // if user is authenticated in the session, carry on 
+    if (req.isAuthenticated() && req.user.validated === 'true')
+        res.redirect('/dashboard');
+
+    // if they aren't redirect them to the home page
+    return next();
 }
 
 function isProf(req, res, next) {
