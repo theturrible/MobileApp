@@ -33,6 +33,9 @@ function createMenu() {
 		switch(e.index) {
 		case 0:
 
+			var courseContent = createCalendarView(drawer.centerWindow);
+			drawer.centerWindow = courseContent;
+			
 			break;
 		case 1:
 
@@ -77,6 +80,30 @@ function createMenu() {
 	win.add(tableView);
 	return win;
 }
+
+
+function createCalendarView(prev){
+	var backButton = Ti.UI.createButton({
+		title : "<--"
+	});
+	var wndNewWindow = Ti.UI.createWindow({
+		leftNavButton : backButton,
+		title : "Calendar"
+	});
+
+	backButton.addEventListener("click", function() {
+		drawer.centerWindow = prev;
+	});
+
+	var navController2 = Ti.UI.iOS.createNavigationWindow({
+		window : wndNewWindow
+	});
+
+	return navController2;
+}
+
+
+
 
 function createCourseDetails(courseData, prev) {
 
