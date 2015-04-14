@@ -739,12 +739,17 @@ module.exports = function(app, passport, jwt) {
            CheckInModel.findById(decoded.id , function(err, checkIn){
                 if(err) 
                     return res.json({ status : false });
-                var check = { 'id' : req.user.id, 'email' : req.user.local.email };
+                for(var i=0; i < checkIn.students.length; i++){
+                    if(checkIn.students[i].id === decoded.id){
+                        return res.json({ status : 'dupe'});
+                    }
+                }
+                var check = { 'id' : decoded.id, 'email' : decoded.email };
                 checkIn.students.push(check);
                 checkIn.save(function(err){
                     if(!err)
                         return res.json({ status : true });
-                })
+                });
             });
         } else {
             res.json({ 'status' : false });
@@ -770,7 +775,7 @@ module.exports = function(app, passport, jwt) {
 
         //user has authenticated correctly thus we create a JWT token 
         //can set expiration in .encode if we need
-        var token = jwt.encode({ username: user.local.email, expire: expire }, app.get('tokenSecret'));
+        var token = jwt.encode({ email: user.local.email, id: user.id ,expire: expire }, app.get('tokenSecret'));
 
         var auth            = new AuthModel();
 

@@ -12,6 +12,8 @@
           var time = moment();
           var expire = moment('<%= checkin[checkin.length-1].expire %>');
 
+          console.log('<%= checkin[checkin.length-1].token %>');
+
           if( time.valueOf() < expire.valueOf() ){
             $('#qrpanel').removeClass('hidden');
             new QRCode(document.getElementById("qrcode"), {
