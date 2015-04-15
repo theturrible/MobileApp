@@ -776,10 +776,12 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
-    //Checks that a qr code token is valid for student check-in
+    //Checks that a qr code token is valid for student check-in and saves it to the checkin doc
     app.post('/api/courses/checkin', isAuth, function (req, res){
         //console.log(req.body.user_checkin_token);
         var decoded = jwt.decode(req.body.user_checkin_token, app.get('tokenSecret'));
+        var authDecode = jwt.decode(req.query.auth, app.get('tokenSecret'));
+
         var expire = moment(decoded.expire);
         //console.log(moment().valueOf() + " is now and expire is: " + expire);
         if(moment().valueOf() < expire.valueOf() ) {
@@ -791,7 +793,8 @@ module.exports = function(app, passport, jwt) {
                         return res.json({ status : 'dupe'});
                     }
                 }
-                var check = { 'studentId' : decoded.id, 'email' : decoded.email };
+
+                var check = { 'studentId' : decoded.id, 'email' : authDecode.email };
                 checkIn.students.push(check);
                 checkIn.save(function(err){
                     if(!err)
@@ -861,7 +864,7 @@ module.exports = function(app, passport, jwt) {
 
         //user has authenticated correctly thus we create a JWT token 
         //can set expiration in .encode if we need
-        var token = jwt.encode({ username: user.local.email, id: user.id, expire: expire }, app.get('tokenSecret'));
+        var token = jwt.encode({ email: user.local.email, id: user.id, expire: expire }, app.get('tokenSecret'));
 
         //return variable
         var auth = new AuthModel();
