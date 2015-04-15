@@ -567,9 +567,9 @@ module.exports = function(app, passport, jwt) {
 
 
     //GET COURSE BY PROFESSORS USER ID
-    // --accepts role and user id
-    // --returns json course with professor id ==
-    app.post('/api/courses/student', isAuth, function (req, res){
+    // --accepts user id
+    // --returns json course
+    app.get('/api/courses/professor', isAuth, function (req, res){
         CourseModel.find({'professor': req.body.profId}, function(err, course){
             if(err) 
                 return res.json({ status : false });
@@ -646,6 +646,52 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
+    //STUDENT: Add a course
+    //POST
+    // accepts:
+    /* 
+        - auth token in param
+    json body
+    {
+        "courseId" : " _id "
+    }
+    */
+    app.post('/api/user/addcourse', isAuth, function (req, res){
+        var decoded = jwt.decode(req.query.auth, app.get('tokenSecret'));
+
+        UserModel.findById(decoded.id, function (err, user){
+            if(err)
+                return res.json({status : 'error 1'});
+
+            for(var i=0; i < user.courses.length; i++){
+                if(user.courses[i].courseId === req.body.courseId )
+                    return res.json({ status : 'dupe'});
+            }
+
+            user.courses.push({ courseId : req.body.courseId });
+            user.save(function (err){
+                if(err)
+                    return res.json({status : 'error 2'});
+                CourseModel.findById(req.body.courseId, function (err, course){
+                    if(err)
+                        return res.json({status : 'error 3'});
+
+                    for(var i=0; i < course.students.length; i++){
+                        if(course.students[i].studentId === decoded.id)
+                            return res.json({ status : 'dupe'});
+                    }
+
+                    course.students.push({ studentId : decoded.id, email : decoded.email });
+                    course.save(function (err){
+                        if(err)
+                            return res.json({status : 'error 4'});
+                        return res.json({ courses : user.courses });
+                    });
+                });
+            });
+        });
+    });
+
     //DELETE A COURSE BY ID
     //  --accepts id as url parameter
     //  --returns success or err
@@ -698,6 +744,7 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
+    //GET ALL Assignments BY A COURSE ID    
     app.get('/api/courses/assign/:id', isAuth, function (req, res){
         return CourseModel.findById(req.params.id, function (err, course) {
             if (!err) {
@@ -708,8 +755,8 @@ module.exports = function(app, passport, jwt) {
         });
     });
 
-    //Delete an announcement by id
-    //send id of course in params and id of announcement in json under title "announce" : "_id"
+    //Delete an assignment by id
+    //send id of course in params and id of announcement in json under title "assign" : "_id"
     app.delete('/api/courses/assign/:id', isAuth, function (req, res) {
         return CourseModel.findById(req.params.id, function (err, course) {
             if (!err) {
@@ -740,11 +787,11 @@ module.exports = function(app, passport, jwt) {
                 if(err) 
                     return res.json({ status : false });
                 for(var i=0; i < checkIn.students.length; i++){
-                    if(checkIn.students[i].id === decoded.id){
+                    if(checkIn.students[i].studentId === decoded.id){
                         return res.json({ status : 'dupe'});
                     }
                 }
-                var check = { 'id' : decoded.id, 'email' : decoded.email };
+                var check = { 'studentId' : decoded.id, 'email' : decoded.email };
                 checkIn.students.push(check);
                 checkIn.save(function(err){
                     if(!err)
@@ -775,7 +822,8 @@ module.exports = function(app, passport, jwt) {
 
         //user has authenticated correctly thus we create a JWT token 
         //can set expiration in .encode if we need
-        var token = jwt.encode({ email: user.local.email, id: user.id ,expire: expire }, app.get('tokenSecret'));
+        /*
+        var token = jwt.encode({ email: user.local.email, id: user.id, expire: expire }, app.get('tokenSecret'));
 
         var auth            = new AuthModel();
 
@@ -788,9 +836,11 @@ module.exports = function(app, passport, jwt) {
             if (err)
                 return res.json({status: "mongo save error"});
         });
-
+        
         res.json({auth: token, id: user.id});
+        */
 
+        res.json({ status : req.flash('signupMessage') });
 
       })(req, res, next);
     });
@@ -804,14 +854,14 @@ module.exports = function(app, passport, jwt) {
         if (err) { return next(err) }
         if (!user) {
             //failed login return
-            return res.json(401, { user_auth_status: 'false' });
+            return res.json(401, { user_auth_status: req.flash('loginMessage') });
         }
 
-        var expire = moment().add(1 ,'hour').valueOf();
+        var expire = moment().add(7 ,'days').valueOf();
 
         //user has authenticated correctly thus we create a JWT token 
         //can set expiration in .encode if we need
-        var token = jwt.encode({ username: user.local.email, expire: expire }, app.get('tokenSecret'));
+        var token = jwt.encode({ username: user.local.email, id: user.id, expire: expire }, app.get('tokenSecret'));
 
         //return variable
         var auth = new AuthModel();

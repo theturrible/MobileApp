@@ -7,8 +7,8 @@ var checkInSchema = mongoose.Schema({
 	start  		: 	String,
 	expire 		: 	String,
 	students 	:   [{ 
-						id 		: 	String,
-						email 	: 	String
+						studentId 		: 	String,
+						email 			: 	String
 					}],
 	create 		: 	String
 });

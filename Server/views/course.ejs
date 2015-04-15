@@ -29,10 +29,9 @@
 
     <!-- show any messages that come back with authentication -->
     <div class="row">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-5">
+        <div class="col-sm-3">
             <div class="page-header">
-                <h3><span class="fa fa-bullhorn"></span> Announcements <a data-toggle="modal" data-target="#announce"><span class="fa fa-plus-square-o" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
+                <h3><span class="fa fa-bullhorn"></span> Announcements <a data-toggle="modal" data-target="#announce"><span class="fa fa-plus-square-o" style="padding-left: 5%; cursor: pointer;"></span></a></h3>
             </div>
             <div>
                 <% for(var i = course.announce.length; i --> 0; ) { %>
@@ -48,7 +47,7 @@
             </div>
         </div>
         <div class="col-sm-1"></div>
-        <div class="col-sm-5">
+        <div class="col-sm-3">
             <div class="page-header">
                 <h3><span class="fa fa-file-text-o"></span> Assignments <span class="badge"></span><a data-toggle="modal" data-target="#assign"><span class="fa fa-plus-square-o" style="padding-left: 20%; cursor: pointer;"></span></a></h3>
             </div>
@@ -65,6 +64,23 @@
                  <% } %>
                  <% if(course.assign.length < 1) { %>
                         <p class="text-muted">No Assignments</p>
+                <% } %>
+            </div>
+        </div>
+        <div class="col-sm-1"></div>
+        <div class="col-sm-3">
+          <div class="page-header">
+                <h3><span class="fa fa-users"></span> Students <span class="badge"></span></h3>
+            </div>
+            <div>
+                <% for(var k = course.students.length; k --> 0; ) { %>
+                    <div class="list-group">
+                        <h4 class="list-group-item-heading"><span class="fa fa-circle-o" style="padding-left: 10%; padding-right: 15%;" ></span><%= course.students[k].email %></h4>
+                        <br>
+                    </div>
+                 <% } %>
+                 <% if(course.students.length < 1) { %>
+                        <p class="text-muted">No Students</p>
                 <% } %>
             </div>
         </div>

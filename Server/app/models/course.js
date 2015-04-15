@@ -29,7 +29,8 @@ var courseSchema = mongoose.Schema({
 						create 	: 	String
 					}],
 	students 	: 	[{
-						id 	 	: 	String
+						studentId 	 	: 	String,
+						email 			: 	String
 					}]
 });
 

@@ -34,7 +34,7 @@ var userSchema = mongoose.Schema({
         email        : String,
         name         : String
     },
-    courses          : [{ id    :   String}]
+    courses          : [{ courseId    :   String}]
 });
 
 // methods ======================
