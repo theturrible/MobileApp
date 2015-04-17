@@ -9,3 +9,25 @@
 // object. For example:
 //
 // Alloy.Globals.someGlobalFunction = function(){};
+
+
+var pWidth = Ti.Platform.displayCaps.platformWidth;
+var pHeight = Ti.Platform.displayCaps.platformHeight;
+Ti.App.SCREEN_WIDTH = (pWidth > pHeight) ? pHeight : pWidth;
+Ti.App.SCREEN_HEIGHT = (pWidth > pHeight) ? pWidth : pHeight;
+
+Alloy.CFG.defaultLoginSpace = 60;
+Alloy.CFG.defaultLoginElementHeight = 50;
+
+Alloy.CFG.defaultLoginButtonSpace = 50;
+Alloy.CFG.defaultLoginButtonHeight = 40;
+
+Alloy.CFG.loginWidth = pWidth / 1.5;
+Alloy.CFG.leftOffset = (pWidth  - Alloy.CFG.loginWidth)/2 ;
+Titanium.API.log("Setting element width to: "  + Alloy.CFG.loginWidth);
+
+Alloy.CFG.loginTop = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 0));
+Alloy.CFG.loginTop1 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 1));
+
+Alloy.CFG.loginTop2 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 2));
+Alloy.CFG.loginTop3 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 3));

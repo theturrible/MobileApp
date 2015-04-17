@@ -1,3 +1,11 @@
+//data access
+
+
+//styling options ->
+
+
+//just redirects to the login page if we need to login again.
+
 //check if we already have a token saved, if not - open login screen.
 var id = Titanium.App.Properties.getString("user_auth_token", 
 	function(){	
@@ -8,9 +16,10 @@ var id = Titanium.App.Properties.getString("user_auth_token",
 
 var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
 
+
 httpClient.onload = function(){
 	var res = JSON.parse(httpClient.responseText); 
-	Titanium.API.log("Currecnt login status: " + res.user_auth_token);
+	Titanium.API.log("Current login status: " + res.user_auth_token);
 	if(res.user_auth_status == "true"){
 		Alloy.createController('dashboard').getView();
 	}else{

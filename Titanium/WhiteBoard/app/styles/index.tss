@@ -1,15 +1,48 @@
-".container": {
-	backgroundImage:'shared/bkg_login.jpg'
+".container[platform=android]": {
+	backgroundImage:'/Shared/bkg_login.jpg',
+	layout: 'vertical'
+}
+".container[platform=ios]": {
+	backgroundImage:'Shared/bkg_login.jpg',
+	
 }
 
-"Label": {
-	width: Ti.UI.SIZE,
-	height: Ti.UI.SIZE,
-	color: "#000"
+"#txtLogin": {
+	borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED, 
+	backgroundColor:"white", 
+	color: 'black',
+	width: Alloy.CFG.loginWidth, 
+	left: Alloy.CFG.leftOffset, 
+	top:  Alloy.CFG.loginTop,
+	height: Alloy.CFG.defaultLoginElementHeight
+}
+"#txtPass": {
+	borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED, 
+	backgroundColor:"white", 
+	color: 'black',
+	width: Alloy.CFG.loginWidth, 
+	left: Alloy.CFG.leftOffset, 
+	top:  Alloy.CFG.loginTop1,
+	height: Alloy.CFG.defaultLoginElementHeight
+}
+"#btnLogin": {
+	borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED, 
+	backgroundColor:"white", 
+	color: 'black',
+	width: Alloy.CFG.loginWidth, 
+	left: Alloy.CFG.leftOffset, 
+	top:  Alloy.CFG.loginTop2,
+	height: Alloy.CFG.defaultLoginButtonHeight
+}
+"#btnSignup": {
+	borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED, 
+	backgroundColor:"white", 
+	color: 'black',
+	width: Alloy.CFG.loginWidth, 
+	left: Alloy.CFG.leftOffset, 
+	top:  Alloy.CFG.loginTop3,
+	height: Alloy.CFG.defaultLoginButtonHeight
 }
 
-"#label": {
-	font: {
-		fontSize: 12
-	}
-}
+
+
