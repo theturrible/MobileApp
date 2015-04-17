@@ -1,4 +1,7 @@
 var NappDrawerModule = require('dk.napp.drawer');
+var moment = require('moment');
+
+
 
 function createMenu() {
 	var win = Ti.UI.createWindow({
@@ -122,29 +125,81 @@ function createDashboard(prev){
 		
 	});
 
-	var table = Ti.UI.createTableView();
-	var tableData = [];
-	
-	
-	var httpClient = Ti.Network.createHTTPClient({
-		timeout : 10000
-	});
+	//announcements
+	var sectionAnnouncement = Ti.UI.createTableViewSection();
+	//create the header view
+	var headerViewAnnounce = Ti.UI.createView({backgroundColor: '#b3b3b3'});
+	var headerLabelAnnouncement = Ti.UI.createLabel({
+	  text: 'Announcements',
+	  left: 10
 
+	});
+	headerViewAnnounce.add(headerLabelAnnouncement);
+	sectionAnnouncement.setHeaderView(headerViewAnnounce);
+
+	//now
+	var sectionNow = Ti.UI.createTableViewSection();
+	//create the view
+	var headerViewNow = Ti.UI.createView({backgroundColor: '#b3b3b3'});
+	var headerLabel = Ti.UI.createLabel({
+	  text: 'Now',
+	  left: 10
+	});
+	headerViewNow.add(headerLabel);
+	sectionNow.setHeaderView(headerViewNow);
+	
+	//today
+	var sectionToday = Ti.UI.createTableViewSection();
+	//create the header view
+	var headerViewToday = Ti.UI.createView({backgroundColor: '#b3b3b3'});
+	var headerLabelToday = Ti.UI.createLabel({
+	  text: 'Today',
+	  left: 10
+	});
+	headerViewToday.add(headerLabelToday);
+	sectionToday.setHeaderView(headerViewToday);
+			
+	//tomorrow		
+	var sectionTomorrow = Ti.UI.createTableViewSection();
+	//create the header view
+	var headerViewTomorrow = Ti.UI.createView({backgroundColor: '#b3b3b3'});
+	var headerLabelTomorrow = Ti.UI.createLabel({
+	  text: 'Tomorrow',
+	  left: 10
+	});
+	sectionTomorrow.setHeaderView(headerViewTomorrow);
+		
+	//now lets populate all the categories
+	
+	
+	var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
 	httpClient.onload = function() {
 		
 	};
-
 	httpClient.onerror = function() {
 		alert("Unfortunately, we have encountered an error getting out server to play nice.");
 		$.index.open();
 	};
-
+	
+	
+	httpClient.open('POST', 'http://ifdef.me:8080/api/logged');
+	httpClient.setRequestHeader('Content-Type', 'application/json');
+	var token = Titanium.App.Properties.getString("user_auth_token");
+	httpClient.send(JSON.stringify({"user_auth_token": token}));
+	
+	
+	
+	
+	var table = Ti.UI.createTableView({
+		data : [sectionAnnouncement, sectionNow, sectionToday, sectionTomorrow]
+	});
+	win.add(table);
+	
 	var navController = Ti.UI.iOS.createNavigationWindow({
 			window : win
 	});
 		
 	return navController;
-
 }
 
 
