@@ -1,0 +1,323 @@
+<h1>Ti.RedLaser Module</h1>
+<h2>Description</h2>
+<p>This module makes the RedLaser API available to Titanium developers.</p>
+<h2>Licensing</h2>
+<p>You will need to add a RedLaser license file to your app to be able to use
+the RedLaser module beyond the free trial. The license for Titanium apps is
+the same and is created the same way (<a href="http://redlaser.com/developers/portal/">on the RedLaser development portl</a>)
+as for native apps. </p>
+<p>The license file will have to be added to the Titanium app project in Titanium
+Studio. For iOS, the file must be placed under the <em>Resources</em> directory. For
+Android, the file must be placed under the <em>platform/android/bin/assets</em> directory,
+where <em>platform</em> is at the same level as <em>Resources</em>.</p>
+<p>Note that it may take some time, in extreme cases up to 48 hours,
+for a newly generated license to become active. During this time you may receive
+error messages indicating a problem with the license file, even though there
+is nothing wrong with the file or its placement.</p>
+<h2>Dependencies</h2>
+<p>This module requires Release 3.2.3.GA or newer of the Titanium SDK.</p>
+<p>This module does not include support for the ARMv6 architecture on iOS.
+Refer to the Titanium Mobile 2.1.3.RC Release Notes
+for further details about ARMv6 support.</p>
+<h2>Getting Started</h2>
+<p>View the <a href="http://docs.appcelerator.com/titanium/latest/#!/guide/Using_Titanium_Modules">Using Titanium Modules</a> document for instructions on getting
+started with using this module in your application.</p>
+<h2>Accessing the RedLaser Module</h2>
+<p>To access this module from JavaScript, you would do the following:</p>
+<pre><code>var RedLaser = require("ti.redlaser");
+</code></pre>
+<p>The RedLaser variable is a reference to the Module object.  </p>
+<h2>Usage</h2>
+<p>The following is a simple example of how to use the RedLaser module:</p>
+<pre><code>RedLaser.addEventListener('scannerActivated', function() {
+    // Change settings such as supported barcode types here.
+});
+
+RedLaser.addEventListener('scannerStatusUpdated', function(updateInfo) {
+    // Digest results returned by the RedLaser SDK here.
+});
+
+overlayView = Ti.UI.createView({...});
+cameraPreview = RedLaser.createCameraPreview({...});
+
+RedLaser.startScanning({
+    overlay: overlayView,
+    cameraPreview: cameraPreview
+});
+</code></pre>
+<p>The <em>startScanning</em> function brings up the camera preview and starts
+the scanning operation. The <em>scannerActivated</em> event is sent when the
+scanner becomes active. This is an important event because many of
+the scanner's settings can only be queried and changed while the scanner
+is active.</p>
+<p>The <em>overlay</em> parameter of the <em>startScanning</em> function can be used
+to specify a Titanium view that will be applied to the camera preview
+screen as an overlay. The purpose of this overlay is to provide a user
+interface while the scanner is active; the RedLaser SDK itself does not
+provide any user interface for the scanner. Although this parameter is
+optional, in practice it will be almost always necessary to provide
+some kind of user interface.</p>
+<p>Once the scanner is active, it sends <em>scannerStatusUpdated</em>
+messages at regular intervals (several times a second -- not only when
+new barcodes are discovered). The discovered barcodes are attached to the
+event object that the event handler function receives as parameter.</p>
+<h2>BarcodeResult class</h2>
+<p>Barcodes are stored in instances of the <em>BarcodeResult</em> class. It is not
+possible (or necessary) to instantiate this class from JavaScript. The
+BarcodeResult instances are created when the scanner discovers a barcode
+and exposed to JavaScript via the <em>scannerStatusUpdated</em> and (in the case
+of iOS) the <em>scannerReturnedResults</em> events.</p>
+<h3>Properties and Functions of BarcodeResult objects</h3>
+<h4>barcodeType</h4>
+<p><strong>Type</strong>: Integer </p>
+<h4>barcodeTypeString</h4>
+<p><strong>Type</strong>: String </p>
+<h4>barcodeString</h4>
+<p><strong>Type</strong>: String </p>
+<h4>barcodeExtendedString</h4>
+<p><strong>Type</strong>: String </p>
+<h4>associatedBarcode</h4>
+<p>iOS only.</p>
+<p><strong>Type</strong>: BarcodeResult</p>
+<h4>uniqueID</h4>
+<p>Android only.</p>
+<p><strong>Type</strong>: String</p>
+<h4>associatedBarcodeUUID</h4>
+<p>Android only.</p>
+<p><strong>Type</strong>: String</p>
+<h4>firstScanTime</h4>
+<p><strong>Type</strong>: Date</p>
+<h4>mostRecentScanTime</h4>
+<p><strong>Type</strong>: Date</p>
+<h4>barcodeLocation</h4>
+<p><strong>Type</strong>: Array of 4 point objects, each with x and y properties.</p>
+<h4>getAssociatedBarcode(<array of BarcodeResult objects>)</h4>
+<p><strong>Return type</strong>: BarcodeResult</p>
+<h4>equals(<BarcodeResult object>)</h4>
+<p><strong>Return type</strong>: Boolean</p>
+<h3>Properties, Functions and Events of the Module Object</h3>
+<h4>sdkVersion</h4>
+<p><strong>Type</strong>: String</p>
+<h4>status</h4>
+<p>Compare this to the STATUS_XXX constants.</p>
+<p><strong>Type</strong>: Integer</p>
+<h4>isFlashAvailable</h4>
+<p>Only works after the scanner was started. Call <em>startScanning()</em> first. <strong>Read only.</strong></p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>torchState</h4>
+<p>Can be used to turn flash on/off. See also <em>turnTorch()</em>. Only works after the scanner was started. Call <em>startScanning()</em> first.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>isFocusing</h4>
+<p>Only works after the scanner was started. Call <em>startScanning()</em> first.
+<strong>iOS only.</strong></p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>useFrontCamera</h4>
+<p>Only works after the scanner was started. Call <em>startScanning()</em> first.
+<strong>iOS only.</strong></p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>exposureLock</h4>
+<p>Only works after the scanner was started. Call <em>startScanning()</em> first.
+<strong>iOS only.</strong></p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>activeRect</h4>
+<p>Only works after the scanner was started. Call <em>startScanning()</em> first.</p>
+<p><strong>Type</strong>: Rectangle object with x, y, width, and height properties of float type. </p>
+<h4>orientation</h4>
+<p>Only works after the scanner was started. Call <em>startScanning()</em> first. <strong>iOS only.</strong></p>
+<p><strong>Type</strong>: Integer</p>
+<h4>scanCodabar</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanCode128</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanCode39</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanCode93</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanDataMatrix</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanEan13</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanEan2</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanEan5</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanEan8</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanGS1Databar</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanGS1DatabarExpanded</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanITF</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanPDF417</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanQRCode</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanRSS14</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on. <strong>Android only.</strong></p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>scanUPCE</h4>
+<p>Turns detection of this type of barcode on/off. By default, detection
+of every supported barcode type is on.</p>
+<p><strong>Type</strong>: Boolean</p>
+<h4>enabledTypes</h4>
+<p>Turns detection of several barcodes on/off. By default, detection
+of every supported barcode type is on. <strong>Android only.</strong></p>
+<p><strong>Type</strong>: Integer</p>
+<h4>startScanning(<parameter object>)</h4>
+<p>Brings up the camera preview and starts the scanner.</p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li><em>overlay</em>: A TiView object that provides a user interface while the camera
+preview is active.</li>
+<li><em>cameraPreview</em>: A <a href="camerapreview.html">Ti.RedLaser.CameraPreview</a> object created by the createCameraPreview
+function. </li>
+<li><em>cameraIndex</em>: The index of the desired camera. <strong>Android only.</strong> See
+<em>useFrontCamera</em> on iOS.</li>
+<li><em>orientation</em>: Equivalent to <em>getOrientationSetting</em>. <strong>Android only.</strong></li>
+</ul>
+<p><strong>Return type</strong>: void</p>
+<h4>createCameraPreview(<parameter object>)</h4>
+<p>Creates a <a href="camerapreview.html">Ti.RedLaser.CameraPreview</a> where the camera preview can be displayed. This view must be 
+passed into <em>startScanning</em> to start scanning and display the preview in that view.
+See <em>startScanning</em> for more details.</p>
+<p><strong>Parameters</strong></p>
+<p><a href="camerapreview.html">Ti.RedLaser.CameraPreview</a> parameters</p>
+<p><strong>Return type</strong>: <a href="camerapreview.html">Ti.RedLaser.CameraPreview</a> that can be passed into <em>startScanning</em> as <em>cameraPreview</em></p>
+<h4>pauseScanning()</h4>
+<p>Pauses scanning without closing the camera preview. <strong>iOS only.</strong></p>
+<p><strong>Return type</strong>: void</p>
+<h4>resumeScanning()</h4>
+<p>Resumes scanning after it was paused with <em>pauseScanning()</em>. <strong>iOS only.</strong></p>
+<p><strong>Return type</strong>: void</p>
+<h4>doneScanning()</h4>
+<p>Stops scanning and closes the camera preview.</p>
+<p><strong>Return type</strong>: void</p>
+<h4>clearResultSet()</h4>
+<p>Equivalent of <em>BarcodePickerController.clearResultsSet</em>. <strong>iOS only.</strong></p>
+<p><strong>Return type</strong>: void</p>
+<h4>findBarcodesInBlob(<TiBlob>)</h4>
+<p><strong>Return type</strong>: Array of <em>BarcodeResult</em> objects. <strong>iOS only.</strong></p>
+<h4>turnTorch(boolean)</h4>
+<p>Turns the flash on/off. See also <em>torchState</em>.</p>
+<p><strong>Return type</strong>: void</p>
+<h4>requestCameraSnapshot([boolean])</h4>
+<p>Equivalent to <em>requestCameraSnapshot</em> on iOS and to <em>requestImageData</em> on Android.
+The boolean parameter is for <strong>iOS only</strong>.</p>
+<p><strong>Return type</strong>: void</p>
+<h4>scannerActivated event</h4>
+<p>Fired after the <em>startScanning()</em> function completes the initialization of the
+scanner. This event does not have any properties.</p>
+<h4>scannerStatusUpdated event</h4>
+<p>Fired repeatedly while the scanner is running.</p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li><em>foundBarcodes</em>: Array of <em>BarcodeResult</em> objects, representing all the barcodes
+discovered during this session.</li>
+<li><em>newFoundBarcodes</em>: Array of <em>BarcodeResult</em> objects, representing the barcodes
+discovered since the last <em>scannerStatusUpdated</em> event.</li>
+<li><em>guidance</em>: Integer.</li>
+<li><em>valid</em>: Boolean. <strong>iOS only.</strong></li>
+<li><em>inRange</em>: Boolean.</li>
+<li><em>cameraSupportsAutofocus</em>: Boolean. <strong>iOS only.</strong></li>
+<li><em>partialBarcode</em>: <strong>The type of this property depends on the platform.</strong> On iOS,
+it is a string; on Android, it is a <em>BarcodeResult</em> object.</li>
+<li><em>cameraSnapshot</em>: TiBuffer object holding the image data of the camera snapshot.</li>
+</ul>
+<p><strong>Note:</strong> Only the <em>foundBarcodes</em> and <em>newFoundBarcodes</em> properties are guaranteed
+to be present.</p>
+<h4>scannerReturnedResults event</h4>
+<p>Fired at the end of a scanning section. <strong>iOS only.</strong></p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li><em>results</em>: Array of <em>BarcodeResult</em> objects, representing all the barcodes
+discovered during the session.</li>
+</ul>
+<h4>backButtonPressed event</h4>
+<p>Fired when the back button is pressed while the scanner is active. This event
+does not have any properties. <strong>Android only.</strong></p>
+<h4>enabledBarcodeTypesChanged event</h4>
+<p>Fired when the set of enabled barcode types is changed. This event
+does not have any properties. <strong>Android only.</strong></p>
+<h4>cameraError event</h4>
+<p>Fired when the OS reports an error with the camera. <strong>Android only.</strong></p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li><em>errorCode</em>: Integer.</li>
+</ul>
+<h3>Constants</h3>
+<p>The constants listed in this section are attached to the module object.</p>
+<p>The following constants represent barcode types:</p>
+<ul>
+<li>BARCODE_TYPE_CODABAR</li>
+<li>BARCODE_TYPE_CODE128</li>
+<li>BARCODE_TYPE_CODE39</li>
+<li>BARCODE_TYPE_CODE93</li>
+<li>BARCODE_TYPE_DATAMATRIX</li>
+<li>BARCODE_TYPE_EAN13</li>
+<li>BARCODE_TYPE_EAN2</li>
+<li>BARCODE_TYPE_EAN5</li>
+<li>BARCODE_TYPE_EAN8</li>
+<li>BARCODE_TYPE_GS1DATABAR</li>
+<li>BARCODE_TYPE_GS1DATABAR_EXPANDED</li>
+<li>BARCODE_TYPE_ITF</li>
+<li>BARCODE_TYPE_NONE</li>
+<li>BARCODE_TYPE_PDF417</li>
+<li>BARCODE_TYPE_QRCODE</li>
+<li>BARCODE_TYPE_RSS14</li>
+<li>BARCODE_TYPE_UPCE</li>
+</ul>
+<p>The following constants represent the status of the RedLaser SDK:</p>
+<ul>
+<li>STATUS_API_LEVEL_TOO_LOW</li>
+<li>STATUS_EVAL_MODE_READY</li>
+<li>STATUS_LICENSED_MODE_READY</li>
+<li>STATUS_MISSING_OS_LIBS</li>
+<li>STATUS_NO_CAMERA</li>
+<li>STATUS_BAD_LICENSE</li>
+<li>STATUS_SCAN_LIMIT_REACHED</li>
+<li>STATUS_MISSING_PERMISSIONS</li>
+<li>STATUS_UNKNOWN_STATE</li>
+</ul>
+<h2>Native SDK Reference</h2>
+<p><a href="redlaser-titanium-to-native-mapping.html">This page</a> shows a comparison between
+the Titanium API and the native SDKs.</p>
+<h2>Author</h2>
+<p>Zsombor Papp, Logical Labs</p>
+<p>zsombor.papp@logicallabs.com<br>
+titanium@logicallabs.com</p>
+<h2>Module History</h2>
+<p>View the <a href="changelog.html">change log</a> for this module.</p>
+<h2>Feedback and Support</h2>
+<p>Please direct all questions, feedback, and concerns to <a href="mailto:info@appcelerator.com?subject=Android%20RedLaser%20Module">info@appcelerator.com</a>.</p>
+<h2>License</h2>
+<p>Copyright(c) 2010-2013 by Appcelerator, Inc. All Rights Reserved. Please see the LICENSE file included in the distribution for further details.</p>

@@ -31,27 +31,27 @@ function createMenu() {
 
 	tableView.addEventListener("click", function(e) {
 		switch(e.index) {
-		case 0:
+		case 0:												//calendar
 
 			var courseContent = createCalendarView(drawer.centerWindow);
 			drawer.centerWindow = courseContent;
 			
 			break;
-		case 1:
+		case 1:												//tasks
 
 			break;
-		case 2:
+		case 2:												//grades
 
 			break;
-		case 3:
+		case 3:												//courses window
 
 			break;
-		case 4:
-
+		case 4:												//checkin window
+			Alloy.createController('checkin').getView();		
 			break;
-		case 5:
+		case 5:												//settings
 			break;
-		case 6:
+		case 6:													//logout
 			//logout
 			var httpClient = Ti.Network.createHTTPClient({
 				timeout : 10000
@@ -60,6 +60,9 @@ function createMenu() {
 				alert("logout success!");
 				var index = Alloy.createController('index').getView();
 				Titanium.App.Properties.setString("user_auth_token", "");
+				
+				//this needs to close all other windows because they stay opne on actual phone.
+				drawer.close();
 				index.open();
 			};
 			httpClient.onerror = function() {
