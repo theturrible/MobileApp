@@ -176,9 +176,9 @@ function createDashboard(prev){
 	httpClient.onload = function() {
 		
 	};
+	
 	httpClient.onerror = function() {
 		alert("Unfortunately, we have encountered an error getting out server to play nice.");
-		$.index.open();
 	};
 	
 	
