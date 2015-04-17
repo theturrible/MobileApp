@@ -376,6 +376,23 @@ module.exports = function(app, passport, jwt) {
         }
         });
     });
+
+    app.post('/course/delete/:id', isLoggedIn, isProf, function (req, res) {
+        return CourseModel.findById(req.params.id, function (err, course) {
+            try{
+                return course.remove(function (err) {
+                    if (err) {
+                        return res.json({status : false});
+                    } else {
+                        //console.log(err);
+                        return res.redirect('/dashboard');
+                    }
+                });
+            }catch(err){
+                return res.json({status : 'error caught in delete'});
+            }
+        });
+    });
     
 
     // =====================================
