@@ -1,9 +1,9 @@
 <Alloy>
 	<Window class="container">
-		<TextField id="txtLogin" class="login" hintText="Login" borderStyle="Titanium.UI.INPUT_BORDERSTYLE_ROUNDED"></TextField>
-        <TextField id="txtPass"  class="password" hintText="Password" borderStyle="Titanium.UI.INPUT_BORDERSTYLE_ROUNDED"> ></TextField>
-        <Button id="btnLogin"    class="btnLogin" borderStyle="Titanium.UI.INPUT_BORDERSTYLE_ROUNDED">Login</Button>
-		<Button id="btnSignup"   class="btnSignup" borderStyle="Titanium.UI.INPUT_BORDERSTYLE_ROUNDED">Sign Up</Button>
+		<TextField id="txtLogin" class="login" hintText="Login" ></TextField>
+        <TextField id="txtPass"  class="password" hintText="Password" > ></TextField>
+        <Button id="btnLogin"    class="btnLogin">Login</Button>
+		<Button id="btnSignup"   class="btnSignup">Sign Up</Button>
 
 	</Window>
 </Alloy>

@@ -26,8 +26,16 @@ Alloy.CFG.loginWidth = pWidth / 1.5;
 Alloy.CFG.leftOffset = (pWidth  - Alloy.CFG.loginWidth)/2 ;
 Titanium.API.log("Setting element width to: "  + Alloy.CFG.loginWidth);
 
-Alloy.CFG.loginTop = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 0));
+Alloy.CFG.loginTop = ((pHeight / 3));
+Titanium.API.log("Setting element top to: "  + Alloy.CFG.loginTop);
 Alloy.CFG.loginTop1 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 1));
+
+
+Alloy.CFG.loginButton1 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace + Alloy.CFG.defaultLoginButtonSpace));
+Alloy.CFG.loginButton2 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace + Alloy.CFG.defaultLoginButtonSpace));
 
 Alloy.CFG.loginTop2 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 2));
 Alloy.CFG.loginTop3 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 3));
+
+
+

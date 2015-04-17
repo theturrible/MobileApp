@@ -15,8 +15,6 @@ var id = Titanium.App.Properties.getString("user_auth_token",
 );
 
 var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
-
-
 httpClient.onload = function(){
 	var res = JSON.parse(httpClient.responseText); 
 	Titanium.API.log("Current login status: " + res.user_auth_token);

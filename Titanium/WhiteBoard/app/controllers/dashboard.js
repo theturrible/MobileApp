@@ -107,6 +107,47 @@ function createCalendarView(prev){
 
 
 
+function createDashboard(prev){
+	var rightBtn = Ti.UI.createButton({
+		title : "Menu"
+	});
+	rightBtn.addEventListener("click", function() {
+		drawer.toggleRightWindow();
+	});
+
+	//create dashboard
+	var win = Ti.UI.createWindow({
+		Title : "Dashboard",
+		rightNavButton : rightBtn
+		
+	});
+
+	var table = Ti.UI.createTableView();
+	var tableData = [];
+	
+	
+	var httpClient = Ti.Network.createHTTPClient({
+		timeout : 10000
+	});
+
+	httpClient.onload = function() {
+		
+	};
+
+	httpClient.onerror = function() {
+		alert("Unfortunately, we have encountered an error getting out server to play nice.");
+		$.index.open();
+	};
+
+	var navController = Ti.UI.iOS.createNavigationWindow({
+			window : win
+	});
+		
+	return navController;
+
+}
+
+
 
 function createCourseDetails(courseData, prev) {
 
@@ -152,9 +193,9 @@ function createCourseDetails(courseData, prev) {
 	var table = Ti.UI.createTableView({
 		data : [section1, section2]
 	});
-
+	var navController1;
 	wndNewWindow.add(table);
-	var navController1 = Ti.UI.iOS.createNavigationWindow({
+		 navController1 = Ti.UI.iOS.createNavigationWindow({
 		window : wndNewWindow
 	});
 
@@ -162,7 +203,7 @@ function createCourseDetails(courseData, prev) {
 
 }
 
-function createDashboard() {
+function createCourses() {
 
 	var rightBtn = Ti.UI.createButton({
 		title : "Right"
@@ -221,10 +262,11 @@ function createDashboard() {
 	httpClient.setRequestHeader('Content-Type', 'application/json');
 	httpClient.send();
 
-	var navController = Ti.UI.iOS.createNavigationWindow({
-		window : win
-	});
 
+	var navController = Ti.UI.iOS.createNavigationWindow({
+			window : win
+	});
+		
 	return navController;
 }
 
