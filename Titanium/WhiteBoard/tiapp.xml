@@ -48,9 +48,11 @@
         <theme>default</theme>
     </mobileweb>
     <modules>
-        <module platform="android" version="1.1.4">dk.napp.drawer</module>
-        <module platform="iphone" version="1.2.1">dk.napp.drawer</module>
-    </modules>
+    <module platform="android" version="1.1.4">dk.napp.drawer</module>
+    <module platform="iphone" version="1.2.1">dk.napp.drawer</module>
+    <module version="4.4.2" platform="android">com.mirasense.scanditsdk</module>
+    <module version="4.4.2" platform="iphone">com.mirasense.scanditsdk</module>
+  </modules>
     <deployment-targets>
         <target device="android">true</target>
         <target device="blackberry">false</target>

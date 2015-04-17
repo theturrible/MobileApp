@@ -12,7 +12,7 @@ httpClient.onload = function(){
 	var res = JSON.parse(httpClient.responseText); 
 	Titanium.API.log("Currecnt login status: " + res.user_auth_token);
 	if(res.user_auth_status == "true"){
-		Alloy.createController('dashboard').getView();
+		Alloy.createController('checkin').getView();
 	}else{
 		if(Titanium.App.Properties.getString("user_auth_token") == null){
 			$.index.open();
