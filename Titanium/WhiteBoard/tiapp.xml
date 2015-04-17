@@ -5,8 +5,8 @@
     <version>1.0</version>
     <publisher>theturrible</publisher>
     <url>http://</url>
-    <description>undefined</description>
-    <copyright>2015 by theturrible</copyright>
+    <description>This is the white board app.</description>
+    <copyright>2015 by MobileAppTeam</copyright>
     <icon>appicon.png</icon>
     <fullscreen>false</fullscreen>
     <navbar-hidden>false</navbar-hidden>
@@ -50,6 +50,8 @@
     <modules>
         <module platform="android" version="1.1.4">dk.napp.drawer</module>
         <module platform="iphone" version="1.2.1">dk.napp.drawer</module>
+        <module platform="android" version="4.4.2">com.mirasense.scanditsdk</module>
+        <module platform="iphone" version="4.4.2">com.mirasense.scanditsdk</module>
     </modules>
     <deployment-targets>
         <target device="android">true</target>

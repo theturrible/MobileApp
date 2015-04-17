@@ -69,7 +69,7 @@ btnSignup.addEventListener('click', function(){
 	
 	
 	
-	httpClient.open('POST', 'http://localhost:8080/api/signup');
+	httpClient.open('POST', 'http://ifdef.me:8080/api/signup');
 	httpClient.setRequestHeader('Content-Type', 'application/json');
 	httpClient.send(JSON.stringify(data));
 
