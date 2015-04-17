@@ -28,7 +28,7 @@ httpClient.onerror = function(){
 	$.index.open();
 };
 
-httpClient.open('POST', 'http://localhost:8080/api/logged');
+httpClient.open('POST', 'http://ifdef.me:8080/api/logged');
 httpClient.setRequestHeader('Content-Type', 'application/json');
 var token = Titanium.App.Properties.getString("user_auth_token");
 httpClient.send(JSON.stringify({"user_auth_token": token}));
@@ -68,7 +68,7 @@ $.btnLogin.addEventListener('click',function(e)
 			Titanium.API.log(respJSON);
 		
 		};
-		httpClient.open('POST', 'http://localhost:8080/api/login');
+		httpClient.open('POST', 'http://ifdef.me:8080/api/login');
 		httpClient.setRequestHeader('Content-Type', 'application/json');
 		
 		var data = {

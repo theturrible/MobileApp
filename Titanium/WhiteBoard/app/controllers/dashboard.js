@@ -67,7 +67,7 @@ function createMenu() {
 				
 			};
 
-			httpClient.open('post', 'http://localhost:8080/api/logout');
+			httpClient.open('post', 'http://ifdef.me:8080/api/logout');
 			httpClient.setRequestHeader('Content-Type', 'application/json');
 			httpClient.send(JSON.stringify({
 				auth : Titanium.App.Properties.getString("user_auth_token")
@@ -213,7 +213,7 @@ function createDashboard() {
 		$.index.open();
 	};
 
-	httpClient.open('GET', 'http://localhost:8080/api/courses?auth=' + Titanium.App.Properties.getString("user_auth_token"));
+	httpClient.open('GET', 'http://ifdef.me:8080/api/courses?auth=' + Titanium.App.Properties.getString("user_auth_token"));
 	Titanium.API.log(Titanium.App.Properties.getString("user_auth_token"));
 	httpClient.setRequestHeader('Content-Type', 'application/json');
 	httpClient.send();
