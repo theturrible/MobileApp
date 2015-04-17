@@ -529,6 +529,18 @@ module.exports = function(app, passport, jwt) {
     // /API/COURSES ========================
     // =====================================
 
+    app.get('/api/courses/student', isAuth, function (req, res){
+        var authDecode = jwt.decode(req.query.auth, app.get('tokenSecret'));
+
+        console.log(authDecode.id);
+
+        UserModel.findById( authDecode.id, function (err, user){
+            if(err)
+                return res.json({ status : 'Error in find courses by student id'});
+            return res.send(user.courses);
+        });
+    }); 
+
     //GET ALL COURSES
     // --returns json of all coourses
     app.get('/api/courses', isAuth, function (req, res){
