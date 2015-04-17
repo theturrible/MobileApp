@@ -61,7 +61,7 @@ function createMenu() {
 				var index = Alloy.createController('index').getView();
 				Titanium.App.Properties.setString("user_auth_token", "");
 				
-				//this needs to close all other windows because they stay opne on actual phone.
+				//this needs to close all other windows because they stay opne on actual phone.`
 				drawer.close();
 				index.open();
 			};
