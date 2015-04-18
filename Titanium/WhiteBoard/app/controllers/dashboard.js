@@ -24,7 +24,97 @@ Ti.API.info("windowDidOpen");
 drawer.addEventListener('windowDidClose', function(e) {
 Ti.API.info("windowDidClose");
 });
+//new design
 
+function createNewRightDrawer() {
+	var win = Ti.UI.createWindow({
+		backgroundImage : 'shared/bkg_main.jpg'
+	});
+
+	var data = [{
+		title : "Calendar"
+	}, {
+		title : "Tasks"
+	}, {
+		title : "Grades"
+	}, {
+		title : "Courses"
+	}, {
+		title : "Check in"
+	}, {
+		title : "Settings"
+	}, {
+		title : "Log out"
+	}];
+
+	var tableView = Ti.UI.createTableView({
+		data : data,
+		style : Ti.UI.iPhone.TableViewStyle.PLAIN,
+		separatorStyle : Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
+		separatorColor : 'transparent',
+		top : 20
+	});
+
+	tableView.addEventListener("click", function(e) {
+		switch(e.index) {
+		case 0:												//calendar
+
+			var courseContent = createCalendarView(drawer.centerWindow);
+			drawer.centerWindow = courseContent;
+			
+			break;
+		case 1:												//tasks
+
+			break;
+		case 2:												//grades
+
+			break;
+		case 3:												//courses window
+
+			break;
+		case 4:												//checkin window
+			Alloy.createController('checkin').getView();		
+			break;
+		case 5:												//settings
+			break;
+		case 6:													//logout
+			//logout
+			var httpClient = Ti.Network.createHTTPClient({
+				timeout : 10000
+			});
+			httpClient.onload = function() {
+				alert("logout success!");
+				var index = Alloy.createController('index').getView();
+				Titanium.App.Properties.setString("user_auth_token", "");
+				
+				//this needs to close all other windows because they stay opne on actual phone.`
+				drawer.close();
+				index.open();
+			};
+			httpClient.onerror = function() {
+				alert("Unfortunately, we have encountered an error getting out server to play nice.");
+				
+			};
+
+			httpClient.open('post', 'http://ifdef.me:8080/api/logout');
+			httpClient.setRequestHeader('Content-Type', 'application/json');
+			httpClient.send(JSON.stringify({
+				auth : Titanium.App.Properties.getString("user_auth_token")
+			}));
+			break;
+
+		}
+	});
+
+	win.add(tableView);
+	return win;
+}
+
+
+
+
+
+//gets the data
 var courseData = createCourses();
 
 function createMenu() {
@@ -133,7 +223,7 @@ function createCalendarView(prev){
 
 function createDashboard(){
 	var rightBtn = Ti.UI.createButton({
-		title : "Menu"
+		title : "+"
 	});
 	rightBtn.addEventListener("click", function() {
 		drawer.toggleRightWindow();
@@ -146,30 +236,7 @@ function createDashboard(){
 		
 	});
 	
-	var relevantCourses = Alloy.Globals.relevantCourses;
-	var allCourses = Alloy.Globals.courses;
-	var relevantCourseData = [];
-	for(var i = 0; i < relevantCourses.length; i++){
-		var course = relevantCourses[i];
-		
-		Titanium.API.log("looking for course course " + JSON.stringify(course));
-	
-		for(var j = 0; j < Alloy.Globals.courses.length; j++){
-			var currCourse = Alloy.Globals.courses[j];
-			if(currCourse._id == course.courseId){
-				Titanium.API.log("adding: " + currCourse._id + " courseID: " + course.courseId);
-				relevantCourseData.push(currCourse);
-			}
-			
-			
-
-		}		
-	}
-	Alloy.Globals.courseData = relevantCourseData;
-	
-	
-	
-	
+	var relevantCourseData = Alloy.Globals.courseData;
 
 
 	//now
@@ -216,27 +283,132 @@ function createDashboard(){
 	sectHeaderAnnouncements.add(lblAnnouncements);
 	sectAnn.setHeaderView(sectHeaderAnnouncements);	
 	
-	Titanium.API.log("courseDataLength " + relevantCourseData.lenght);
+	Titanium.API.log("courseDataLength " + Alloy.Globals.courseData.lenght);
 	
+	//gets all of the announcement, for right now, there is no real filtering,
+	// ideally we just want to get the latest 5, or the ones from this week, or some other time. 
+	// we can even make it so its linked from settings, and you can customize your time schedules.
 	for(var i=0 ;i < Alloy.Globals.courseData.length;i++){
-		var courseData = relevantCourseData[i];
-		Titanium.API.log("getting announcements form " + JSON.stringify(courseData.announce[0]));
+		var courseData = Alloy.Globals.courseData[i];
+		
+		var sectionName = courseData.section +  " " + courseData.num;
+		
+		
+		//get announcenemnts
 		if (courseData.announce.length > 0) {
+			Titanium.API.log("getting announcements form " + courseData.section +  " " + courseData.num);
 			for (var j = 0; j < courseData.announce.length; j++) {
 				var announcement = courseData.announce[j];
 				sectAnn.add(Ti.UI.createTableViewRow({
+					type  : 'ann',
+					sect : sectionName,
+					course: courseData.name,
 					data  : announcement,
-					title : announcement.body
+					title : announcement.body,
+					hasChild: true
 				}));
+				
 			}
 		}		
 		
+		//ass now.
+		if (courseData.assign.length > 0) {
+			Titanium.API.log("getting assignments TODAY form " + courseData.section +  " " + courseData.num);
+			for (var j = 0; j < courseData.assign.length; j++) {
+				var assign = courseData.assign[j];
+				//today view
+					if(assign.dueDate == moment().format('MM/DD/YYYY')){
+						sectionToday.add(Ti.UI.createTableViewRow({
+						type  : 'assNow',
+						sect : sectionName,
+						course: courseData.name,
+						data  : assign,
+						title : assign.name,
+						hasChild: true
+					}));
+				}
+				//section tomorrow
+					if(assign.dueDate == moment().add(1, 'days').format('MM/DD/YYYY')){
+						sectionTomorrow.add(Ti.UI.createTableViewRow({
+						type : 'assTomorrow',
+						sect : sectionName,
+						course: courseData.name,
+						data  : assign,
+						title : assign.name,
+						hasChild: true
+					}));
+					
+				}
+				
+				
+			}
+		}
+		
+	
 	}
 	
-	//gets just one course by id.
-	var table = Ti.UI.createTableView({
-		data : [sectAnn, sectionNow, sectionToday, sectionTomorrow]
+		//gets just one course by id.
+		var table = Ti.UI.createTableView({
+			data : [sectAnn, sectionNow, sectionToday, sectionTomorrow]
+		});
+		
+		
+	//probably needs to be moved out from this place, but for now, this will just have to do. 	
+	table.addEventListener('click', function(e) {
+	    Titanium.API.log("getting announcements form " + JSON.stringify(e.rowData.data) + " Course Name: " + e.rowData.course); 
+	    
+	    var backButton = Ti.UI.createButton({
+			title : "<--"
+		});
+		var section = e.rowData.sect;
+		Titanium.API.log("Section: " + section);
+		var annDetailsView = Ti.UI.createWindow({
+			leftNavButton : backButton,
+			title : "Announcement for " + e.rowData.sect,
+			backgroundImage:'Shared/bkg_login.jpg' 
+		});
+		
+		
+		var timeStampLbl = Ti.UI.createLabel({
+		  text: 'Added on: ' + moment(e.rowData.data.create).format("MM/DD/YY HH:MM:SS"),
+		  top: Alloy.CFG.loginTop, 
+		  left: Alloy.CFG.leftOffset
+		});
+		
+		
+		annDetailsView.add(timeStampLbl);
+		var announcementContnt = Ti.UI.createLabel({
+			text: e.rowData.data.body,
+			top: Alloy.CFG.loginTop1,
+			width: Alloy.CFG.loginWidth + 100,
+			height: 200
+			
+		});
+		
+		var courseNameForAnnouncement = Ti.UI.createLabel({
+			text: "By: " +  e.rowData.course,
+			top: Alloy.CFG.loginTop + 250
+		});
+		
+		annDetailsView.add(courseNameForAnnouncement);
+		annDetailsView.add(announcementContnt);
+		
+		
+		backButton.addEventListener("click", function() {
+			drawer.centerWindow = Alloy.Globals.prev;
+		});
+	
+		var navController2 = Ti.UI.iOS.createNavigationWindow({
+			window : annDetailsView
+		});
+	
+		Alloy.Globals.prev = drawer.centerWindow;
+		
+		drawer.centerWindow = navController2;
+
 	});
+	
+	
 	
 	win.add(table);
 	
@@ -306,6 +478,35 @@ function createCourseDetails(courseData, prev) {
 
 }
 
+//loading all of the data for courses
+
+
+function finishLoadingCourseData(){
+	var relevantCourses = Alloy.Globals.relevantCourses;
+	var allCourses = Alloy.Globals.courses;
+	var relevantCourseData = [];
+	
+	for(var i = 0; i < relevantCourses.length; i++){
+		var course = relevantCourses[i];
+		
+		Titanium.API.log("looking for course course " + JSON.stringify(course));
+	
+		for(var j = 0; j < Alloy.Globals.courses.length; j++){
+			var currCourse = Alloy.Globals.courses[j];
+			if(currCourse._id == course.courseId){
+				Titanium.API.log("adding: " + currCourse._id + " courseID: " + course.courseId);
+				relevantCourseData.push(currCourse);
+			}
+			
+			
+
+		}		
+	}
+	Alloy.Globals.courseData = relevantCourseData;
+	drawer.fireEvent("allDone");
+	
+};
+
 function createCourses() {
 	var httpClient = Ti.Network.createHTTPClient({
 		timeout : 10000
@@ -355,7 +556,6 @@ function getRelevantCourses(){
 	httpClient.send();
 }
 
-
 drawer.addEventListener('loadComplete', function(e) {
 	Titanium.API.log("Got Fire Complete");
 	getRelevantCourses();
@@ -365,19 +565,25 @@ drawer.addEventListener('loadComplete', function(e) {
 drawer.addEventListener('relevantComplete', function(e) {
 	Titanium.API.log("Got Fire in relevant");
 	Titanium.API.log("CourseData: " + JSON.stringify(Alloy.Globals.courses));
-	var mainWindow = createDashboard();	
-	drawer.centerWindow = mainWindow;	
-	drawer.open();
-	
+	finishLoadingCourseData();	
 });
 drawer.addEventListener('finalComplete', function(e) {
 	drawer.centerWindow = mainWindow;	
-	drawer.open();
+	finishLoadingCourseData();
+});
+drawer.addEventListener	('allDone', function(e) {
+	Titanium.API.log("loadcomplete");	
+	//display views and shiet.
 });
 
 
 
 
-
+/*
+ * 	var mainWindow = createDashboard();	
+	drawer.centerWindow = mainWindow;	
+	drawer.open();
+ * 
+ */
 
 
