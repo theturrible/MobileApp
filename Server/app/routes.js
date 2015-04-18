@@ -314,13 +314,10 @@ module.exports = function(app, passport, jwt) {
             course.assign.push(assign);
 
             return course.save(function (err) {
-                if (!err) {
-                    //console.log("updated");
+                console.log('here');
+                if (!err)
                     return  res.redirect('/course/'+req.params.id);
-                } else {
-                    //console.log(err);
-                    return res.json({status : "error in save"});
-                }
+                return res.json({status : "error in save"});
             });
         });
     });
@@ -328,6 +325,7 @@ module.exports = function(app, passport, jwt) {
     app.get('/course/checkin/:id', isLoggedIn, isProf, function(req, res) {
         return CheckInModel.find({'courseId' : req.params.id }, function (err, checkIn) {
             if (!err) {
+                console.log(checkIn)
                 res.render('checkin.ejs', {
                     req  : req,
                     user : req.user, // get the user out of session and pass to template
@@ -367,6 +365,20 @@ module.exports = function(app, passport, jwt) {
         });  
     });
 
+    app.get('/course/checkin/students/:id', isLoggedIn, isProf, function(req, res) {
+        return CheckInModel.findById( req.params.id , function (err, checkIn) {
+            if (!err) {
+                console.log(checkIn);
+                res.render('viewCheck.ejs', {
+                    req  : req,
+                    user : req.user, // get the user out of session and pass to template
+                    students : checkIn.students,
+                    message : req.flash('addCourseMessage')
+                });
+            }
+        });
+    });
+
     app.get('/api/checkin', function (req, res){
         return CheckInModel.find(function (err, checkIns) {
         if (!err) {
@@ -378,6 +390,7 @@ module.exports = function(app, passport, jwt) {
     });
 
     app.post('/course/delete/:id', isLoggedIn, isProf, function (req, res) {
+        console.log()
         return CourseModel.findById(req.params.id, function (err, course) {
             try{
                 return course.remove(function (err) {
@@ -818,7 +831,7 @@ module.exports = function(app, passport, jwt) {
                 if(err) 
                     return res.json({ status : false });
                 for(var i=0; i < checkIn.students.length; i++){
-                    if(checkIn.students[i].studentId === decoded.id){
+                    if(checkIn.students[i].studentId === authDecode.id){
                         return res.json({ status : 'dupe'});
                     }
                 }

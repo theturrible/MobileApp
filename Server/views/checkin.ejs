@@ -103,7 +103,7 @@
                             <h4 class="list-group-item-heading">Expired @ <%= moment( checkin[i].expire).format('LT') %></h4>
                             <h2 class="list-group-item-text" style="margin-left: 10%; display: inline-block; margin-right: 10%;"><span class="label label-default"><%= checkin[i].students.length %></span></h2>
                             <h2 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%;">Checked In</h2>
-                            <a data-toggle="modal" data-target="#viewCheckIns" style="cursor: pointer;"><h3 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%; margin-left: 10%;"> View<span class="fa fa-chevron-right"></span></h3></a>
+                            <a href='/course/checkin/students/<%= checkin[i]._id %>?course=<%= req.params.id %>' style="cursor: pointer;"><h3 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%; margin-left: 10%;"> View<span class="fa fa-chevron-right"></span></h3></a>
                             <br>
                         </div>
 
@@ -113,40 +113,38 @@
                             <h4 class="list-group-item-heading">Expires @ <%= moment( checkin[i].expire).format('LT') %></h4>
                             <h2 class="list-group-item-text" style="margin-left: 10%; display: inline-block; margin-right: 10%;"><span class="label label-primary"><%= checkin[i].students.length %></span></h2>
                             <h2 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%;">Checked In</h2>
-                            <a data-toggle="modal" data-target="#viewCheckIns" style="cursor: pointer;"><h3 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%; margin-left: 10%;"> View<span class="fa fa-chevron-right"></span></h3></a>
+                            <a href='/course/checkin/students/<%= checkin[i]._id %>?course=<%= req.params.id %>' style="cursor: pointer;"><h3 class="list-group-item-text" style="display: inline-block; margin-bottom: 5%; margin-left: 10%;"> View<span class="fa fa-chevron-right"></span></h3></a>
                             <br>
                         </div>
-                     <% } %> 
-                     <!-- Modal Announcement-->
-                      <div class="modal fade" id="viewCheckIns" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                     <% } %>   
+                     <!-- Modal Announcement
+                      <div class="modal fade" id="viewCheckIns<%= i %>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel<%= i %>" aria-hidden="true">
                           <div class="modal-dialog">
                              <div class="modal-content">
                                 <div class="modal-header">
                                       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                       <h4 class="modal-title" id="myModalLabel">View who is Checked In</h4>
                                 </div>
-                              <div class="modal-body">
-                                  <div class="page-header">
-                                    <h3><span class="fa fa-users"></span> Students <span class="badge"></span></h3>
-                                  </div>
-                              <div>
-                              <% for(var k = checkin[i].students.length; k --> 0; ) { %>
-                                <div class="list-group">
-                                  <h4 class="list-group-item-heading"><span class="fa fa-circle-o" style="padding-left: 10%; padding-right: 5%;" ></span><%= checkin[i].students[k].email %></h4>
-                                  <br>
+                                <div class="modal-body">
+                                    <div class="page-header">
+                                      <h3><span class="fa fa-users"></span> Students <span class="badge"></span></h3>
+                                    </div>
+                                    <div>
+                                    
+                                        <% for(var k = 0; k < checkin[i].students.length; k++ ) { %>
+                                          <div class="list-group">
+                                            <h4 class="list-group-item-heading"><span class="fa fa-circle-o" style="padding-left: 10%; padding-right: 5%;" ></span><%= checkin[i].students[k].email %></h4>
+                                            <br>
+                                          </div>
+                                        <% } %>
+                                    </div>
                                 </div>
-                              <% } %>
-                              <% if(checkin[i].students.length < 1) { %>
-                                <p class="text-muted">No Students Checked In</p>
-                              <% } %>
-                              </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
                           </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                  </div>
-                </div>                  
+                        </div>-->                   
                  <% } %>
             </div>
         </div>

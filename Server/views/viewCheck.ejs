@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+	<% include head_dash %>
+  <script type="text/javascript">
+      $(document).ready(function(){
+      
+      });
+  </script>
+</head>
+<header>
+	<% include header_add %>
+</header>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-3">
+        <% if (message.length > 0) { %>
+            <div class="alert alert-danger"><%= message %></div>
+        <% } %>
+        </div>
+
+        <div class="page-header text-center">
+          <div style="display: inline-block; float: left;">
+              <a href='/course/checkin/<%= req.query.course %>'class="btn btn-warning"><span class="fa fa-chevron-left"></span> back to check-In</a>
+          </div>
+          <br>
+          <br>
+          <div style="display: inline-block;">
+              <h1 style="width: 110%"><span class="fa fa-users" style="margin-right: 5%; "></span>Checked-In<span class="badge"></span></h1>
+          </div>
+        </div>
+    </div>
+
+    
+
+    <div class="row">
+      <br>
+      <br>
+        <div class="col-sm-12 col-offset-3">
+            <% if(students.length < 1) { %>
+                <h3 class="text-muted text-center">No Students Checked-In</h3>
+            <% } else { %>
+              <% for(var k = students.length; k --> 0; ) { %>
+                <div class="list-group text-center">
+                    <div>
+                      <h3 class="list-group-item-heading"><%= students[k].email %></h3>
+                    </div> 
+                    <br>
+                </div>
+             <% } %>
+           <% } %>
+        </div>
+    </div>
+
+</div>
+</body>
+<footer>
+    <% include footer_dash %>
+</footer>
+</html>
