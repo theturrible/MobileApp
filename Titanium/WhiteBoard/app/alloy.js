@@ -65,26 +65,7 @@ var getCourseDetailsByID = function(courseID){
 	
 Alloy.Globals.getCourseData = function(){
 	
-	var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
-	httpClient.onload = function() {		
-		//course IDs
-		var courseID  = JSON.parse(httpClient.responseText);
-		for(var j = 0; j < courseID.length;j++){
-			courseData.push(getCourseDetailsByID(courseID[j].courseId));
-		}
-		//by this point, we should have all the courses loaded.
-			
-	};
-	httpClient.onerror = function() {
-		alert("Unfortunately, we have encountered an error getting out server to play nice.");
-	};
 	
-	var url = 'http://ifdef.me:8080/api/courses/student?auth=' + Titanium.App.Properties.getString("user_auth_token");
-	httpClient.open('GET', url);
-	httpClient.setRequestHeader('Content-Type', 'application/json');
-	httpClient.send();
-	
-	return courses;
 };
 
 Alloy.Globals.getCourseData;
