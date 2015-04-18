@@ -10,7 +10,7 @@
 //
 // Alloy.Globals.someGlobalFunction = function(){};
 
-
+Alloy.Globals.courseData;
 var pWidth = Ti.Platform.displayCaps.platformWidth;
 var pHeight = Ti.Platform.displayCaps.platformHeight;
 Ti.App.SCREEN_WIDTH = (pWidth > pHeight) ? pHeight : pWidth;
@@ -39,3 +39,52 @@ Alloy.CFG.loginTop3 = ((pHeight / 3) + (Alloy.CFG.defaultLoginSpace * 3));
 
 
 
+var getCourseDetailsByID = function(courseID){
+			//get all the course details for the list of courses	
+			Titanium.API.log("got course details: " + courseID);
+		
+			var getCourseDetails = Ti.Network.createHTTPClient({timeout: 1000});
+			//now we have access to course id.
+			
+			getCourseDetails.onload = function() {
+				//course details
+				var courseDetails = JSON.parse(getCourseDetails.responseText);
+				return courseDetails;
+					
+			};
+			getCourseDetails.onerror = function() {
+				alert("BrokeShit");
+			};
+			
+			var url = 'http://ifdef.me:8080/api/courses/'+ courseID +'?auth=' + Titanium.App.Properties.getString("user_auth_token");
+			getCourseDetails.open('GET', url);
+			getCourseDetails.setRequestHeader('Content-Type', 'application/json');
+			getCourseDetails.send();				
+};
+	
+	
+Alloy.Globals.getCourseData = function(){
+	
+	var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
+	httpClient.onload = function() {		
+		//course IDs
+		var courseID  = JSON.parse(httpClient.responseText);
+		for(var j = 0; j < courseID.length;j++){
+			courseData.push(getCourseDetailsByID(courseID[j].courseId));
+		}
+		//by this point, we should have all the courses loaded.
+			
+	};
+	httpClient.onerror = function() {
+		alert("Unfortunately, we have encountered an error getting out server to play nice.");
+	};
+	
+	var url = 'http://ifdef.me:8080/api/courses/student?auth=' + Titanium.App.Properties.getString("user_auth_token");
+	httpClient.open('GET', url);
+	httpClient.setRequestHeader('Content-Type', 'application/json');
+	httpClient.send();
+	
+	return courses;
+};
+
+Alloy.Globals.getCourseData;

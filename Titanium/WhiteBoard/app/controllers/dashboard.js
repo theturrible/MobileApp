@@ -1,7 +1,9 @@
 var NappDrawerModule = require('dk.napp.drawer');
 var moment = require('moment');
 
+var courseData = Alloy.Globals.courseData;
 
+Titanium.API.log(JSON.stringify(courseData));
 
 function createMenu() {
 	var win = Ti.UI.createWindow({
@@ -87,7 +89,6 @@ function createMenu() {
 	return win;
 }
 
-
 function createCalendarView(prev){
 	var backButton = Ti.UI.createButton({
 		title : "<--"
@@ -108,9 +109,7 @@ function createCalendarView(prev){
 	return navController2;
 }
 
-
-
-function createDashboard(prev){
+function createDashboard(){
 	var rightBtn = Ti.UI.createButton({
 		title : "Menu"
 	});
@@ -169,40 +168,23 @@ function createDashboard(prev){
 	});
 	sectionTomorrow.setHeaderView(headerViewTomorrow);
 		
-	//now lets populate all the categories
+	//now lets get all courseID's that the user has.
 	
-	
-	var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
-	httpClient.onload = function() {
-		
-	};
-	
-	httpClient.onerror = function() {
-		alert("Unfortunately, we have encountered an error getting out server to play nice.");
-	};
-	
-	
-	httpClient.open('POST', 'http://ifdef.me:8080/api/logged');
-	httpClient.setRequestHeader('Content-Type', 'application/json');
-	var token = Titanium.App.Properties.getString("user_auth_token");
-	httpClient.send(JSON.stringify({"user_auth_token": token}));
-	
-	
-	
-	
+	//gets just one course by id.
 	var table = Ti.UI.createTableView({
 		data : [sectionAnnouncement, sectionNow, sectionToday, sectionTomorrow]
 	});
+	
 	win.add(table);
 	
 	var navController = Ti.UI.iOS.createNavigationWindow({
 			window : win
 	});
-		
+	
+	
 	return navController;
+
 }
-
-
 
 function createCourseDetails(courseData, prev) {
 
@@ -327,6 +309,9 @@ function createCourses() {
 
 var mainWindow = createDashboard();
 
+
+
+
 var drawer = NappDrawerModule.createDrawer({
 	centerWindow : mainWindow,
 	rightWindow : createMenu(),
@@ -340,11 +325,14 @@ var drawer = NappDrawerModule.createDrawer({
 
 drawer.setAnimationMode(NappDrawerModule.ANIMATION_PARALLAX_FACTOR_7);
 drawer.addEventListener('windowDidOpen', function(e) {
-	Ti.API.info("windowDidOpen");
+Ti.API.info("windowDidOpen");
 });
 
 drawer.addEventListener('windowDidClose', function(e) {
-	Ti.API.info("windowDidClose");
+Ti.API.info("windowDidClose");
 });
 
 drawer.open();
+
+
+
