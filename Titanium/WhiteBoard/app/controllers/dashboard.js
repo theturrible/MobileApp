@@ -114,7 +114,7 @@ function createCourseDetails(courseData) {
 	var wndNewWindow = Ti.UI.createWindow({
 		leftNavButton  : refreshButton,
 		rightNavButton : rightBtn,
-		title : coureData.name,
+		title : courseData.name,
 		cID : courseData._id,
 		backgroundColor : '#b3b3b3'
 	});
