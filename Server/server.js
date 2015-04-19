@@ -9,14 +9,14 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var flash    = require('connect-flash');
 var path 	 = require('path');
-
+var server   = require('http').createServer(app)
 var morgan       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 var session      = require('express-session');
 var jwt 		 = require('jwt-simple');
-
-var configDB = require('./config/database.js');
+var io           = require('socket.io').listen(server); 
+var configDB     = require('./config/database.js');
 
 // configuration ===============================================================
 mongoose.connect(configDB.url); // connect to our database
@@ -29,6 +29,10 @@ app.use(bodyParser()); // get information from html forms
 app.set('view engine', 'ejs'); // set up ejs for templating
 app.set('tokenSecret', 'vcurams');
 
+app.start = app.listen = function(){
+  return server.listen.apply(server, arguments)
+}
+
 // required for passport
 app.use(session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
 app.use(passport.initialize());
@@ -39,8 +43,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 require('./config/passport')(app, passport, jwt); // pass passport for configuration
 
 // routes ======================================================================
-require('./app/routes.js')(app, passport, jwt); // load our routes and pass in our app and fully configured passport
+require('./app/routes.js')(app, passport, jwt, io); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
-app.listen(port);
+app.start(port);
 console.log('The magic happens on port ' + port);

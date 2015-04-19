@@ -1,5 +1,5 @@
 // app/routes.js
-module.exports = function(app, passport, jwt) {
+module.exports = function(app, passport, jwt, io) {
 
     //Requires      ====================================================================================================================================================
         var UserModel          = require('../app/models/user_web');
@@ -7,11 +7,8 @@ module.exports = function(app, passport, jwt) {
         var AuthModel          = require('../app/models/auth');
         var CheckInModel       = require('../app/models/checkIn');
         
-        //some time crap idk it works
-        var moment = require('moment');
-
-        //node mail module
-        var nodemailer = require('nodemailer');
+        var moment             = require('moment');
+        var nodemailer         = require('nodemailer');
 
         // create reusable transporter object using SMTP transport
         var transporter = nodemailer.createTransport({
@@ -651,6 +648,7 @@ module.exports = function(app, passport, jwt) {
                     checkIn.students.push(check);
                     checkIn.save(function(err){
                         if(!err)
+                            io.sockets.emit('newCheck', authDecode.email);
                             return res.json({ status : true });
                     });
                 });
@@ -941,7 +939,9 @@ module.exports = function(app, passport, jwt) {
                 }
             });
         });
-
+// =====================================
+// =============   SOCKET  =============
+// =====================================
     
 }
 
