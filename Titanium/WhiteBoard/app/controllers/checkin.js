@@ -21,9 +21,8 @@
  * 
  * For more information, see http://www.scandit.com/support or
  * contact us at info@scandit.com. 
- */
-// load the Scandit SDK module
-var scanditsdk = require("com.mirasense.scanditsdk");
+*/
+	var scanditsdk = require("com.mirasense.scanditsdk");
 // disable the status bar for the camera view on the iphone and ipad
 if(Ti.Platform.osname == 'iphone' || Ti.Platform.osname == 'ipad'){
         Titanium.UI.iPhone.statusBarHidden = true;
@@ -104,8 +103,28 @@ var button = Titanium.UI.createButton({
 button.addEventListener('click', function() {
     openScanner();
 });
-var rootWindow = Titanium.UI.createWindow({
-    backgroundColor:'#000'
-});
+	var rightBtn = Ti.UI.createButton({
+		title : "+"
+	});
+	rightBtn.addEventListener("click", function() {
+		drawer.toggleRightWindow();
+	});
+	var refreshButton = Ti.UI.createButton({
+		title : "ref"
+	});
+	refreshButton.addEventListener("click", function() {
+		var courseData = createCourses();
+		drawer.close();
+
+	});
+	
+	var wndNewWindow = Ti.UI.createWindow({
+		leftNavButton  : refreshButton,
+		rightNavButton : rightBtn,
+		title : courseData.name,
+		cID : courseData._id,
+		backgroundColor : '#b3b3b3'
+	});
 rootWindow.add(button);
-rootWindow.open();
+
+
