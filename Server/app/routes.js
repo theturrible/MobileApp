@@ -276,6 +276,21 @@ module.exports = function(app, passport, jwt, io) {
                 }
             });
         });
+         // Api: get all course ids of a user
+        // -returns json array of course ids
+        app.get('/api/courses/student', isAuth, function (req, res){
+            //get user id from token
+            console.log("/api/courses/student hit" );
+            var authDecode = jwt.decode(req.query.auth, app.get('tokenSecret'));
+
+            console.log("decoded auth id: " + authDecode.id);
+
+            UserModel.findById( authDecode.id, function (err, user){
+                if(err)
+                    return res.json({ status : 'Error in find courses by student id'});
+                return res.send(user.courses);
+            });
+        });
 
         // Api: get all courses
         // --returns json of all coourses
@@ -300,21 +315,6 @@ module.exports = function(app, passport, jwt, io) {
             });
         });
 
-        // Api: get all course ids of a user
-        // -returns json array of course ids
-        app.get('/api/courses/student', isAuth, function (req, res){
-            //get user id from token
-            console.log("/api/courses/student hit" );
-            var authDecode = jwt.decode(req.query.auth, app.get('tokenSecret'));
-
-            console.log("decoded auth id: " + authDecode.id);
-
-            UserModel.findById( authDecode.id, function (err, user){
-                if(err)
-                    return res.json({ status : 'Error in find courses by student id'});
-                return res.send(user.courses);
-            });
-        }); 
 
         // Api: get all announcements by course id
         app.get('/api/courses/announce/:id', isAuth, function (req, res){
