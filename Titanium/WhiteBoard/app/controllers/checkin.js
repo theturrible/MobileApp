@@ -94,37 +94,12 @@ Ti.Gesture.addEventListener('orientationchange', function(e) {
         // different than portrait.
     }
 });
-// create start scanner button
-var button = Titanium.UI.createButton({
-    "width":200,
-    "height": 80,
-    "title": "start scanner"
-});
-button.addEventListener('click', function() {
-    openScanner();
-});
-	var rightBtn = Ti.UI.createButton({
-		title : "+"
-	});
-	rightBtn.addEventListener("click", function() {
-		drawer.toggleRightWindow();
-	});
-	var refreshButton = Ti.UI.createButton({
-		title : "ref"
-	});
-	refreshButton.addEventListener("click", function() {
-		var courseData = createCourses();
-		drawer.close();
 
-	});
-	
-	var wndNewWindow = Ti.UI.createWindow({
-		leftNavButton  : refreshButton,
-		rightNavButton : rightBtn,
-		title : courseData.name,
-		cID : courseData._id,
-		backgroundColor : '#b3b3b3'
-	});
-rootWindow.add(button);
+openScanner();
+var rootWindow = Titanium.UI.createWindow({
+    backgroundColor:'#000'
+});
+
+rootWindow.open();
 
 

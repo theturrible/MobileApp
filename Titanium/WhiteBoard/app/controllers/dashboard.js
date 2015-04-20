@@ -3,6 +3,8 @@ var randomLister = "";
 
 var NappDrawerModule = require('dk.napp.drawer');
 var moment = require('moment');
+var scanditsdk = require("com.mirasense.scanditsdk");
+
 var drawer;
 
 var drawer = NappDrawerModule.createDrawer({
@@ -72,7 +74,7 @@ function createNewRightDrawer() {
 		style : Ti.UI.iPhone.TableViewStyle.PLAIN,
 		separatorStyle : Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
 		separatorColor : 'transparent',
-		top : 300
+		top : 420
 		
 	});
 	tableView2.addEventListener("click", function(e) {
@@ -81,8 +83,89 @@ function createNewRightDrawer() {
 		if(e.rowData.title == 'Log Out'){
 			logout();
 		}else{
-			loadCourseByID(e.rowData.courseID);
-		}
+			// Create a window.
+			Alloy.Globals.centerView = drawer.centerWindow;
+			var leftButton = Ti.UI.createButton({
+				title : "Back"
+			});
+			leftButton.addEventListener("click", function() {
+				drawer.centerWindow = Alloy.Globals.centerView;
+			});
+			var rightBtn = Ti.UI.createButton({
+				title : "+"
+			});
+			rightBtn.addEventListener("click", function() {
+				drawer.toggleRightWindow();
+			});
+			
+			var window = Titanium.UI.createWindow({  
+			        leftNavButton: leftButton,
+			        rightNavButton: rightBtn,
+			        title:'Check in',
+			        navBarHidden:false
+			});
+			// Instantiate the Scandit SDK Barcode Picker view.
+			picker = scanditsdk.createView({
+			    width:"100%",
+			    height:"100%"
+			});
+			// Initialize the barcode picker.
+			picker.init("fFvmD4wd41NCJBmJPZFvSHAc35gnIeQJ1lwRx9cw6Pk", 0);
+			 picker.setSuccessCallback(function(e) {
+			 	
+			 	var httpClient = Ti.Network.createHTTPClient({timeout: 10000});
+		
+				httpClient.onload = function(){
+					var answer = JSON.parse(httpClient.responseText);
+					if(answer.status == true){
+						alert("Successful check in!");
+						drawer.centerWindow = Alloy.Globals.centerView;
+					}else{
+						alert("Failed checkin :(");
+					}
+					
+								
+				};
+				httpClient.onerror = function(){
+				
+				};
+				httpClient.open('POST', 'http://ifdef.me:8080/api/courses/checkin?auth=' + Titanium.App.Properties.getString("user_auth_token"));
+				httpClient.setRequestHeader('Content-Type', 'application/json');
+				
+				var data = {
+					user_checkin_token: e.barcode	
+				};
+				httpClient.send(JSON.stringify(data));
+		    });
+			// Add it to the window and open it.
+			window.add(picker);
+			
+			window.addEventListener('open', function(e) {
+		        // Adjust to the current orientation.
+		        // since window.orientation returns 'undefined' on ios devices 
+		        // we are using Ti.UI.orientation (which is deprecated and no longer 
+		        // working on Android devices.)
+		        if(Ti.Platform.osname == 'iphone' || Ti.Platform.osname == 'ipad'){
+		            picker.setOrientation(Ti.UI.orientation);
+		        }   
+		        else {
+		            picker.setOrientation(window.orientation);
+		        }
+		        
+		        picker.setSize(Ti.Platform.displayCaps.platformWidth, 
+		                       Ti.Platform.displayCaps.platformHeight);
+		        picker.startScanning();     // startScanning() has to be called after the window is opened. 
+		    });
+			
+			
+			var navController1;
+			
+			navController1 = Ti.UI.iOS.createNavigationWindow({
+				window : window
+			});
+			drawer.centerWindow = navController1;
+			drawer.toggleRightWindow();
+			}
 	});
 
 	tableView.addEventListener("click", function(e) {
@@ -340,7 +423,7 @@ function createMenu() {
 
 function createCalendarView(prev){
 	var rightBtn = Ti.UI.createButton({
-		title : "+"
+		title: 'Menu'
 	});
 	rightBtn.addEventListener("click", function() {
 		drawer.toggleRightWindow();
@@ -653,6 +736,7 @@ drawer.addEventListener	('allDone', function(e) {
 	Titanium.API.log("allDone");	
 	//lets finish all of the apps..
 	drawer.rightWindow = createNewRightDrawer();
+	drawer.centerWindow = Alloy.Globals.courseViews[0].courseView;
 	drawer.open();
 	
 });
