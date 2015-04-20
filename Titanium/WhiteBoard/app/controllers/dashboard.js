@@ -37,18 +37,21 @@ function createNewRightDrawer() {
 		backgroundColor: "#80FF0000"
 	});
 
-	var data = [
-			{title : 'log out'}
-		
-		];
+	var data = [];
 
+	var data1 =
+		[
+			{title : 'Check In'},
+			{title : 'log Out'}
+		];
 
 	//populate the drawer wiht the new course names
 	
 	for(var i = 0; i < Alloy.Globals.courseData.length; i++){
 		var currentCourse = Alloy.Globals.courseData[i];
 		var courseView = createCourseDetails(currentCourse);
-		data.push({title: currentCourse.section + " " + currentCourse.num, courseID: currentCourse._id, courseView : courseView});	
+		data.push({title: currentCourse.section + " " + currentCourse.num, courseID: currentCourse._id, courseView : courseView});
+		Titanium.API.log("Added Course: " + JSON.stringify(courseView));	
 	}
 	//static
 	//var checkin = createCheckinWindow();
@@ -599,7 +602,7 @@ function getRelevantCourses(){
 		Alloy.Globals.relevantCourses = courseID;
 		drawer.fireEvent("relevantComplete");
 		//by this point, we should have all the courses loaded.
-			
+		Titanium.API.log("relevant courses populated " + httpClient.responseText);
 	};
 	httpClient.onerror = function() {
 		alert("Unfortunately, we have encountered an error getting out server to play nice.");
@@ -629,9 +632,7 @@ drawer.addEventListener('finalComplete', function(e) {
 drawer.addEventListener	('allDone', function(e) {
 	Titanium.API.log("allDone");	
 	//lets finish all of the apps..
-	var rightWindow = createNewRightDrawer();
-	var centerWin = createCalendarView();
-	drawer.rightWindow = rightWindow;
+	drawer.rightWindow = createNewRightDrawer();
 	drawer.open();
 	
 });

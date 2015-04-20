@@ -306,7 +306,7 @@ module.exports = function(app, passport, jwt, io) {
             //get user id from token
             var authDecode = jwt.decode(req.query.auth, app.get('tokenSecret'));
 
-            console.log(authDecode.id);
+            console.log("decoded auth id: " + authDecode.id);
 
             UserModel.findById( authDecode.id, function (err, user){
                 if(err)
