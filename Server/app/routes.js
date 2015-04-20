@@ -304,6 +304,7 @@ module.exports = function(app, passport, jwt, io) {
         // -returns json array of course ids
         app.get('/api/courses/student', isAuth, function (req, res){
             //get user id from token
+            console.log("/api/courses/student hit" );
             var authDecode = jwt.decode(req.query.auth, app.get('tokenSecret'));
 
             console.log("decoded auth id: " + authDecode.id);

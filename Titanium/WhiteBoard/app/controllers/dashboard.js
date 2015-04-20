@@ -34,7 +34,7 @@ var courseData = createCourses();
 
 function createNewRightDrawer() {
 	var win = Ti.UI.createWindow({
-		backgroundColor: "#80FF0000"
+		backgroundColor: "#bbbbb"
 	});
 
 	var data = [];
@@ -42,7 +42,7 @@ function createNewRightDrawer() {
 	var data1 =
 		[
 			{title : 'Check In'},
-			{title : 'log Out'}
+			{title : 'Log Out'}
 		];
 
 	//populate the drawer wiht the new course names
@@ -63,7 +63,26 @@ function createNewRightDrawer() {
 		style : Ti.UI.iPhone.TableViewStyle.PLAIN,
 		separatorStyle : Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
 		separatorColor : 'transparent',
-		top : 20
+		top : 20, 
+		height: 400
+		
+	});
+	var tableView2 = Ti.UI.createTableView({
+		data : data1,
+		style : Ti.UI.iPhone.TableViewStyle.PLAIN,
+		separatorStyle : Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
+		separatorColor : 'transparent',
+		top : 300
+		
+	});
+	tableView2.addEventListener("click", function(e) {
+		
+		Titanium.API.log("getting course by id: " + e.rowData.courseID);
+		if(e.rowData.title == 'Log Out'){
+			logout();
+		}else{
+			loadCourseByID(e.rowData.courseID);
+		}
 	});
 
 	tableView.addEventListener("click", function(e) {
@@ -77,6 +96,7 @@ function createNewRightDrawer() {
 	});
 
 	win.add(tableView);
+	win.add(tableView2);
 	return win;
 }
 
