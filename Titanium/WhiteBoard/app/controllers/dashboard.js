@@ -41,8 +41,8 @@ function createNewRightDrawer() {
 
 	var data = [];
 
-	var data1 =
-		[
+	
+	var data1 =	[
 			{title : 'Check In'},
 			{title : 'Log Out'}
 		];
@@ -442,6 +442,7 @@ function createCalendarView(prev){
 }
 
 function createDashboard(){
+	if (Titanium.Platform.name == 'ios') {
 	var rightBtn = Ti.UI.createButton({
 		title : "+"
 	});
@@ -450,6 +451,13 @@ function createDashboard(){
 	});
 
 	//create dashboard
+	
+	
+	
+		
+		
+	
+	
 	var win = Ti.UI.createWindow({
 		Title : "Dashboard",
 		rightNavButton : rightBtn
@@ -558,13 +566,9 @@ function createDashboard(){
 						hasChild: true
 					}));
 					
-				}
-				
-				
+				}				
 			}
 		}
-		
-	
 	}
 	
 		//gets just one course by id.
@@ -620,7 +624,6 @@ function createDashboard(){
 		});
 	
 		Alloy.Globals.prev = drawer.centerWindow;
-		
 		drawer.centerWindow = navController2;
 
 	});
@@ -635,7 +638,7 @@ function createDashboard(){
 	
 	
 	return navController;
-
+	}
 }
 
 
@@ -740,14 +743,3 @@ drawer.addEventListener	('allDone', function(e) {
 	drawer.open();
 	
 });
-
-
-
-/*
- * 	var mainWindow = createDashboard();	
-	drawer.centerWindow = mainWindow;	
-	drawer.open();
- * 
- */
-
-
