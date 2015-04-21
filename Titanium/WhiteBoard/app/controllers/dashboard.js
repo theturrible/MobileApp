@@ -93,6 +93,95 @@ function createNewRightDrawer() {
 		
 		}else if (e.rowData.title == 'Subscribe to'){
 			Titanium.API.log("subscribe");
+			Alloy.Globals.beforeLogin = drawer.centerWindow;
+		var rightBtn =  Titanium.UI.createImageView({
+		   image: "Shared/check.png",
+		   height:20, 
+		   width:20,
+		   left : Ti.App.SCREEN_WIDTH - 60,
+		});
+	
+		var refreshButton =  Titanium.UI.createImageView({
+		   image: "Shared/x.png",
+		   height:20, 
+		   width:20,
+		});
+		
+		rightBtn.addEventListener("click", function() {
+			//send email
+			var selected =  Alloy.Globals.selectedCourseSub;
+			Ti.API.log("Selected Emails " + JSON.stringify(Alloy.Globals.selectedCourseSub));
+			var courses = [];
+			for(var r = 0; r < selected.length; r++ ){
+				Ti.API.log("Selected Course " + JSON.stringify(selected[r]));
+				if(selected[r].hasCheck){
+					courses.push(selected[r].data._id);
+				}
+			}
+			Ti.API.log("sending to " + courses);
+		});
+
+		refreshButton.addEventListener("click", function() {
+			drawer.centerWindow = Alloy.Globals.beforeLogin;
+			Alloy.Globals.selectedCourseSub = [];
+			
+		});
+		
+		var emailList = Ti.UI.createWindow({
+			modal: true,
+			leftNavButton  : refreshButton,
+			rightNavButton : rightBtn,
+			title : "All Courses",
+			backgroundColor : '#b3b3b3',
+			
+		});
+		var courseData;
+		var selectedOptions;
+		if(!Alloy.Globals.selectedCourseSub){
+			Alloy.Globals.selectedCourseSub = [];
+		}
+		
+		courseData = Alloy.Globals.selectedCourseSub;	
+		var cd = Alloy.Globals.courses;
+		Ti.API.log("Course Data on email call: " +  JSON.stringify(cd));
+		for(var i = 0; i < cd.length; i++){
+			if(cd[i].name){
+				var row = Ti.UI.createTableViewRow({	
+						hasCheck: false,
+						title: cd[i].name + "( "+ cd[i].section + " " + cd[i].num + " @" + cd[i].startTime + " )",
+						data: cd[i],
+						
+				});
+
+
+				
+	  			courseData.push(row);
+  			}
+		}
+		
+		Alloy.Globals.selectedEmailData = courseData;
+		var tblEmail = Ti.UI.createTableView();
+		
+		tblEmail.addEventListener('click', function(e) {
+		  var state = e.rowData.hasCheck;
+		  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title });
+		  Alloy.Globals.selectedCourseSub[e.index] = row;
+		  tblEmail.updateRow(e.index, row, {animated: true});
+		});
+		
+		var emailView = Ti.UI.createView({
+			height: Ti.App.SCREEN_HEIGHT - 70, 
+		});
+		
+		tblEmail.setData(courseData);
+		emailView.add(tblEmail);
+		emailList.add(emailView);
+		
+		var navController1 = Ti.UI.iOS.createNavigationWindow({
+			window: emailList
+		});
+		drawer.centerWindow = navController1;
+			
 			
 			
 			
@@ -134,6 +223,9 @@ function createNewRightDrawer() {
 					var answer = JSON.parse(httpClient.responseText);
 					if(answer.status == true){
 						alert("Successful check in!");
+						drawer.centerWindow = Alloy.Globals.centerView;
+					}else if(answer.status == 'dupe'){
+						alert("Already checked in!");
 						drawer.centerWindow = Alloy.Globals.centerView;
 					}else{
 						alert("Failed checkin :(");
