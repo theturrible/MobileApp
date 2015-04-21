@@ -639,13 +639,16 @@ module.exports = function(app, passport, jwt, io) {
                CheckInModel.findById(decoded.id , function(err, checkIn){
                     if(err) 
                         return res.json({ status : false });
+
                     for(var i=0; i < checkIn.students.length; i++){
+                        //console.log( i + ":" + checkIn.students[i].studentId);
+                        //console.log( i + ":" + authDecode.id);
                         if(checkIn.students[i].studentId === authDecode.id){
                             return res.json({ status : 'dupe'});
                         }
                     }
 
-                    var check = { 'studentId' : decoded.id, 'email' : authDecode.email };
+                    var check = { 'studentId' : authDecode.id, 'email' : authDecode.email };
                     checkIn.students.push(check);
                     checkIn.save(function(err){
                         if(!err)
