@@ -194,7 +194,7 @@ function createNewRightDrawer() {
 
 function loadCourseByID(id){
 	var clickedCourse;
-	Titanium.API.log(JSON.stringify(Alloy.Globals.courseData));
+	Titanium.API.log("Course data from load course by ID: " + JSON.stringify(Alloy.Globals.courseData));
 	for(var i = 0; i < Alloy.Globals.courseData.length; i++){
 		if(Alloy.Globals.courseData[i]._id == id){
 			clickedCourse = Alloy.Globals.courseData[i];
@@ -217,13 +217,19 @@ function createCourseDetails(courseData) {
 	rightBtn.addEventListener("click", function() {
 		drawer.toggleRightWindow();
 	});
-	var refreshButton = Ti.UI.createButton({
+	var refreshButton1 = Ti.UI.createButton({
 		title : "ref"
 	});
+	var refreshButton= Titanium.UI.createImageView({
+	   image: "Shared/refresh.png",
+	   height:20, 
+	   width:20
+	}); 
+	refreshButton.add(image);
+	
 	refreshButton.addEventListener("click", function() {
-		courseData = createCourses();
-		drawer.close();
-
+			courseData = createCourses();
+			drawer.close();
 	});
 	
 	var wndNewWindow = Ti.UI.createWindow({
@@ -245,12 +251,114 @@ function createCourseDetails(courseData) {
 	
 	var image= Titanium.UI.createImageView({
 	   image: "Shared/main.png",
-	   height:57, 
-	   width:57, 
-	   center: (Ti.App.SCREEN_WIDTH/2)-33, 
-	   top:83 
+	   height:30, 
+	   width:30, 
+	   left : 10,
+	   top:115 
 	}); 
- 
+ 	
+ 	image.addEventListener('click', function(){
+		Alloy.Globals.beforeLogin = drawer.centerWindow;
+		var rightBtn =  Titanium.UI.createImageView({
+		   image: "Shared/check.png",
+		   height:20, 
+		   width:20,
+		   left : Ti.App.SCREEN_WIDTH - 60,
+		});
+	
+		var refreshButton =  Titanium.UI.createImageView({
+		   image: "Shared/x.png",
+		   height:20, 
+		   width:20,
+		});
+		
+		rightBtn.addEventListener("click", function() {
+			//send email
+			var selected =  Alloy.Globals.selectedEmailData;
+			var options = 	Alloy.Globals.selectedEmailOptions;
+			Ti.API.log("Selected Emails " + JSON.stringify(Alloy.Globals.selectedEmailData));
+			var emails = [];
+			for(var r = 0; r < selected.length; r++ ){
+				if(options.indexOf(r) !== -1){
+					emails.push(selected[r].title);
+				}
+			}
+			
+			Ti.API.log("sending to " + emails);
+			
+			var emailDrawer = Ti.UI.createEmailDialog();
+			emailDrawer.toRecipients = emails;
+			emailDrawer.open();
+		});
+
+		refreshButton.addEventListener("click", function() {
+			drawer.centerWindow = Alloy.Globals.beforeLogin;
+			Alloy.Globals.selectedEmailData = [];
+			Alloy.Globals.selectedEmailOptions =[0];
+		});
+		
+		var emailList = Ti.UI.createWindow({
+			modal: true,
+			leftNavButton  : refreshButton,
+			rightNavButton : rightBtn,
+			title : courseData.name,
+			cID : courseData._id,
+			backgroundColor : '#b3b3b3',
+			
+		});
+		var studentEmailData;
+		var selectedOptions;
+		if(!Alloy.Globals.selectedEmailData){
+			Alloy.Globals.selectedEmailData = [];
+			Alloy.Globals.selectedEmailOptions = [0];
+		}
+		
+		studentEmailData = Alloy.Globals.selectedEmailData;
+		selectedOptions = Alloy.Globals.selectedEmailOptions;	
+		
+		
+		var cd = courseData.students;
+		Ti.API.log("Course Data on email call: " +  JSON.stringify(cd));
+		for(var i = 0; i < cd.length; i++){
+			if(cd[i].email){
+				var row = Ti.UI.createTableViewRow({hasCheck: selectedOptions.indexOf(i) !== -1, title: cd[i].email });
+				row.hasCheck = true;
+	  			studentEmailData.push(row);
+  			}
+		}
+		
+		Alloy.Globals.selectedEmailData = studentEmailData;
+		var tblEmail = Ti.UI.createTableView();
+		
+		tblEmail.addEventListener('click', function(e) {
+		  var state = e.rowData.hasCheck;
+		  // reuse existing row (using its configuration, not its instance)
+		  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title });
+		  tblEmail.updateRow(e.index, row, {animated: true});
+		  
+		  if (state) {
+		    selectedOptions.push(e.index);
+		  } else {
+		    selectedOptions.splice(selectedOptions.indexOf(e.index),1);
+		   }
+		   Ti.API.log("Course Data event: " +  JSON.stringify(tblEmail.data));
+		   Alloy.Globals.selectedEmailOptions = selectedOptions;
+		});
+		
+		var emailView = Ti.UI.createView({
+			height: Ti.App.SCREEN_HEIGHT - 70, 
+		});
+		
+		tblEmail.setData(studentEmailData);
+		emailView.add(tblEmail);
+		emailList.add(emailView);
+		
+		var navController1 = Ti.UI.iOS.createNavigationWindow({
+			window: emailList
+		});
+		drawer.centerWindow = navController1;
+
+ 	});
 	
 	newView.add(image);
 	wndNewWindow.add(newView);
@@ -334,7 +442,7 @@ function createCourseDetails(courseData) {
 	});
 	var navController1;
 	wndNewWindow.add(table);
-		 navController1 = Ti.UI.iOS.createNavigationWindow({
+	navController1 = Ti.UI.iOS.createNavigationWindow({
 		window : wndNewWindow
 	});
 
