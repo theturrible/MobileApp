@@ -653,6 +653,7 @@ module.exports = function(app, passport, jwt, io) {
                     checkIn.save(function(err){
                         if(!err)
                             io.sockets.emit('newCheck', authDecode.email);
+                            io.sockets.emit('refNum', { "num" : checkIn.students.length, "id" : checkIn._id } );
                             return res.json({ status : true });
                     });
                 });
