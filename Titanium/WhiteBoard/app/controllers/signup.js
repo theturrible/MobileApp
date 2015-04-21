@@ -54,6 +54,7 @@ btnSignup.addEventListener('click', function(){
 		Titanium.App.Properties.setString("loginID", res.id);			
 		win.close();
 		Alloy.createController('index').getView();
+		alert("Please check your email to activate your account");
 	};
 	httpClient.onerror = function(){
 		Titanium.API.log("error");

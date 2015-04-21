@@ -69,13 +69,14 @@ $.btnLogin.addEventListener('click',function(e)
 				$.index.close();
 				Alloy.createController('dashboard').getView();
 			}else{
-				alert("Unable to authenticate, make sure password is valid");
+				alert("Unable to authenticate, make sure password is valid, and your account is activated");
 			}
 						
 		};
 		httpClient.onerror = function(){
 			var respJSON = JSON.parse(httpClient.responseText);
 			Titanium.API.log(respJSON);
+			alert("Unable to authenticate, make sure password is valid");
 		
 		};
 		httpClient.open('POST', 'http://ifdef.me:8080/api/login');

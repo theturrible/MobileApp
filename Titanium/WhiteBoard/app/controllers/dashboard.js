@@ -80,7 +80,7 @@ function createNewRightDrawer() {
 		
 	});
 	tableView2.addEventListener("click", function(e) {
-		
+		drawer.closeRightWindow();
 		if(e.rowData.title == 'Log Out'){
 			Titanium.API.log("logout ");
 			logout();
@@ -155,7 +155,7 @@ function createNewRightDrawer() {
 			httpClient.onload = function(){
 				var resp = JSON.parse(httpClient.responseText);
 				Ti.API.log(httpClient.responseText);
-				if(resp.status == "true"){
+				if(resp.status == true){
 					alert("Added Course");
 					  var state = e.rowData.hasCheck;
 					  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title, data: e.rowData.data});
@@ -164,7 +164,7 @@ function createNewRightDrawer() {
 				}else if(resp.status == "dupe"){
 					alert("already subscribed");
 				}else{
-					alert("Failed to subscribe ;()");
+					alert("Failed to subscribe ;(");
 				}
 			};
 			
@@ -360,7 +360,7 @@ function createCourseDetails(courseData) {
 	   image: "Shared/main.png",
 	   height:30, 
 	   width:30, 
-	   left : 10,
+	   left : 20,
 	   top:115 
 	}); 
  	
@@ -457,6 +457,49 @@ function createCourseDetails(courseData) {
 	
 	newView.add(image);
 	
+	var classTitleLabel = Ti.UI.createLabel({
+		font: { fontSize:24 },
+		text: courseData.name,
+		top: 20, 
+		left: 20
+	});
+	var classProfLabel = Ti.UI.createLabel({
+		font: { fontSize: 22 },
+		text: courseData.profName ,
+		top: 80, 
+		left: 20
+	});
+	var days = "";
+	if(courseData.classDays){
+		if(courseData.classDays.day1){
+			days += "M ";
+		}
+		if(courseData.classDays.day2){
+			days += "T ";
+		}
+		if(courseData.classDays.day3){
+			days += "W ";
+		}
+		if(courseData.classDays.day4){
+			days += "TR ";
+		}
+		if(courseData.classDays.day5){
+			days += "FR ";
+		}
+	}
+	
+	var classTimeLabel = Ti.UI.createLabel({
+		font: { fontSize: 24 },
+		text: days + '@' + courseData.startTime,
+		top: 54, 
+		left: 20
+	});
+
+	
+	newView.add(classTitleLabel);
+	newView.add(classProfLabel);
+	newView.add(classTimeLabel);
+	
 	//get random color from our globals
 	var colorCode = Math.floor((Math.random() * Alloy.Globals.pasterColorCodes.length));
 	newView.setBackgroundColor(Alloy.Globals.pasterColorCodes[colorCode].color);
@@ -480,7 +523,7 @@ function createCourseDetails(courseData) {
 			headerTitle : 'Announcements'
 		});
 		
-		for (var i = courseAnnouncements.length-1; i > 0; i--) {
+		for (var i = courseAnnouncements.length; i --> 0;) {
 			var announcement = courseAnnouncements[i];
 			section1.add(Ti.UI.createTableViewRow({
 				title : announcement.body,
@@ -533,7 +576,7 @@ function createCourseDetails(courseData) {
 		var section2 = Ti.UI.createTableViewSection({
 			headerTitle : 'Assignments'
 		});
-		for (var i = courseAssignments.length-1; i > 0 ; i--) {
+		for (var i = courseAssignments.length; i --> 0;) {
 			var assignment = courseAssignments[i];
 			section2.add(Ti.UI.createTableViewRow({
 				title : assignment.name,
