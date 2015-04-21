@@ -44,8 +44,9 @@ function createNewRightDrawer() {
 	
 	var data1 =	[
 			{title : 'Check In'},
-			{title:  'Email'},
-			{title : 'Log Out'}
+			{title :  'Email'},
+			{title : 'Log Out'},
+			{title : 'Subscribe to'}
 		];
 
 	//populate the drawer wiht the new course names
@@ -90,6 +91,11 @@ function createNewRightDrawer() {
 				});
 			email.open();
 		
+		}else if (e.rowData.title == 'Subscribe to'){
+			Titanium.API.log("subscribe");
+			
+			
+			
 		}else{
 			Titanium.API.log("checkin");
 			// Create a window.
@@ -234,7 +240,7 @@ function createCourseDetails(courseData) {
 	var wndNewWindow = Ti.UI.createWindow({
 		leftNavButton  : refreshButton,
 		rightNavButton : rightBtn,
-		title : courseData.name,
+		title : courseData.section + " " + courseData.num,
 		cID : courseData._id,
 		backgroundColor : '#b3b3b3'
 	});
@@ -351,9 +357,6 @@ function createCourseDetails(courseData) {
 	
 	//get random color from our globals
 	var colorCode = Math.floor((Math.random() * Alloy.Globals.pasterColorCodes.length));
-	
-	
-	
 	newView.setBackgroundColor(Alloy.Globals.pasterColorCodes[colorCode].color);
 	wndNewWindow.add(newView);
 	
