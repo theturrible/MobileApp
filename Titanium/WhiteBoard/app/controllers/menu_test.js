@@ -10,9 +10,6 @@ var centerView = Ti.UI.createView({
 	height: Ti.UI.FILL
 });
 
-
-
-
 var rightMenuView = Ti.UI.createView({
 	backgroundColor:'#ddd',
 	width: Ti.UI.FILL,
@@ -20,35 +17,34 @@ var rightMenuView = Ti.UI.createView({
 });
 
 
-// create a menu
-var leftTableView = Ti.UI.createTableView({
-	font:{fontSize:12},
-	rowHeight:40,
-	data:[
-		{title:'Toggle Left View'},
-		{title:'Change Center Windowr'}, 
-		{title:'Default Window'} 
-	]
-});
-leftMenuView.add(leftTableView);
-leftTableView.addEventListener("click", function(e){
-	Ti.API.info("isAnyWindowOpen: " + drawer.isAnyWindowOpen());
-	switch(e.index){
-		case 0:
-			drawer.toggleLeftWindow(); //animate back to center
-			alert("You clicked " + e.rowData.title + ". Implement menu structure.. ");
-			break;
-		case 1:
-			drawer.setCenterWindow(Ti.UI.createView({backgroundColor:"red"}));
-			drawer.toggleLeftWindow(); //animate back to center
-			break;
-		case 2:
-			drawer.setCenterWindow(centerView);
-			drawer.toggleLeftWindow(); //animate back to center
-			break;
-	}
-});
-
+	// create a menu
+	var leftTableView = Ti.UI.createTableView({
+		font:{fontSize:12},
+		rowHeight:40,
+		data:[
+			{title:'Toggle Left View'},
+			{title:'Change Center Windowr'}, 
+			{title:'Default Window'} 
+		]
+	});
+	leftMenuView.add(leftTableView);
+	leftTableView.addEventListener("click", function(e){
+		Ti.API.info("isAnyWindowOpen: " + drawer.isAnyWindowOpen());
+		switch(e.index){
+			case 0:
+				drawer.toggleLeftWindow(); //animate back to center
+				alert("You clicked " + e.rowData.title + ". Implement menu structure.. ");
+				break;
+			case 1:
+				drawer.setCenterWindow(Ti.UI.createView({backgroundColor:"red"}));
+				drawer.toggleLeftWindow(); //animate back to center
+				break;
+			case 2:
+				drawer.setCenterWindow(centerView);
+				drawer.toggleLeftWindow(); //animate back to center
+				break;
+		}
+	});
 
 // Action Bar - FAKE example
 var actionBar = Ti.UI.createView({
@@ -243,5 +239,100 @@ function onNavDrawerWinOpen(evt) {
 }
 
 
-// lets open it
-drawer.open();
+function finishLoadingCourseData(){
+	var relevantCourses = Alloy.Globals.relevantCourses;
+	var allCourses = Alloy.Globals.courses;
+	var relevantCourseData = [];
+	
+	for(var i = 0; i < relevantCourses.length; i++){
+		var course = relevantCourses[i];
+		
+		Titanium.API.log("looking for course course " + JSON.stringify(course));
+	
+		for(var j = 0; j < Alloy.Globals.courses.length; j++){
+			var currCourse = Alloy.Globals.courses[j];
+			if(currCourse._id == course.courseId){
+				Titanium.API.log("adding: " + currCourse._id + " courseID: " + course.courseId);
+				relevantCourseData.push(currCourse);
+			}
+			
+			
+
+		}		
+	}
+	Alloy.Globals.courseData = relevantCourseData;
+	drawer.fireEvent("allDone");
+	
+};
+
+function createCourses() {
+	var httpClient = Ti.Network.createHTTPClient({
+		timeout : 10000
+	});
+
+	httpClient.onload = function() {
+		Titanium.API.log("got courses.");
+		//actual code
+		var classes = JSON.parse(httpClient.responseText);
+		Titanium.API.log("Firing loadComplete!");
+		Alloy.Globals.courses = classes;
+		drawer.fireEvent("loadComplete");		
+	};
+	httpClient.onerror = function() {
+		alert("Unfortunately, we have encountered an error getting out server to play nice.");
+		$.index.open();
+	};
+
+	httpClient.open('GET', 'http://ifdef.me:8080/api/courses?auth=' + Titanium.App.Properties.getString("user_auth_token"));
+	Titanium.API.log(Titanium.App.Properties.getString("user_auth_token"));
+	httpClient.setRequestHeader('Content-Type', 'application/json');
+	httpClient.send();
+	
+	
+}
+
+function getRelevantCourses(){
+		
+	//now lets get all courseID's that the user has.
+	
+	var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
+	httpClient.onload = function() {		
+		//course IDs
+		var courseID  = JSON.parse(httpClient.responseText);
+		Alloy.Globals.relevantCourses = courseID;
+		drawer.fireEvent("relevantComplete");
+		//by this point, we should have all the courses loaded.
+		Titanium.API.log("relevant courses populated " + httpClient.responseText);
+	};
+	httpClient.onerror = function() {
+		alert("Unfortunately, we have encountered an error getting out server to play nice.");
+	};
+	
+	var url = 'http://ifdef.me:8080/api/courses/student?auth=' + Titanium.App.Properties.getString("user_auth_token");
+	httpClient.open('GET', url);
+	httpClient.setRequestHeader('Content-Type', 'application/json');
+	httpClient.send();
+}
+
+drawer.addEventListener('loadComplete', function(e) {
+	Titanium.API.log("Got Fire Complete");
+	getRelevantCourses();
+	
+});
+
+drawer.addEventListener('relevantComplete', function(e) {
+	Titanium.API.log("Got Fire in relevant");
+	Titanium.API.log("CourseData: " + JSON.stringify(Alloy.Globals.courses));
+	finishLoadingCourseData();	
+});
+drawer.addEventListener('finalComplete', function(e) {
+	drawer.centerWindow = mainWindow;	
+	finishLoadingCourseData();
+});
+drawer.addEventListener	('allDone', function(e) {
+	Titanium.API.log("allDone");	
+	drawer.open();
+	
+});
+
+var courseData = createCourses();
