@@ -44,6 +44,7 @@ function createNewRightDrawer() {
 	
 	var data1 =	[
 			{title : 'Check In'},
+			{title:  'Email'},
 			{title : 'Log Out'}
 		];
 
@@ -79,10 +80,18 @@ function createNewRightDrawer() {
 	});
 	tableView2.addEventListener("click", function(e) {
 		
-		Titanium.API.log("getting course by id: " + e.rowData.courseID);
 		if(e.rowData.title == 'Log Out'){
+			Titanium.API.log("logout ");
 			logout();
+		}else if(e.rowData.title == 'Email'){			
+			var email = Ti.UI.createEmailDialog({
+				toRecipient: "grin.van@gmail.com", 
+				messageBody: "asdf"
+				});
+			email.open();
+		
 		}else{
+			Titanium.API.log("checkin");
 			// Create a window.
 			Alloy.Globals.centerView = drawer.centerWindow;
 			var leftButton = Ti.UI.createButton({
@@ -224,16 +233,39 @@ function createCourseDetails(courseData) {
 		cID : courseData._id,
 		backgroundColor : '#b3b3b3'
 	});
+	
+	var newView = Ti.UI.createView();
 
+	var emailButton = Ti.UI.createLabel({
+		text: "Group Email",
+		top: 120,
+		left: Ti.App.SCREEN_WIDTH/2,
+		height: 20
+	});
+	
+	var image= Titanium.UI.createImageView({
+	   image: "Shared/main.png",
+	   height:57, 
+	   width:57, 
+	   center: (Ti.App.SCREEN_WIDTH/2)-33, 
+	   top:83 
+	}); 
+ 
+	
+	newView.add(image);
+	wndNewWindow.add(newView);
+	
+	
+	
+	
+	
+	
 	var courseNumbers = Ti.UI.createLabel({
 		left : 50,
 		top  : 40,
 		text : courseData.section + " " + courseData.num 
 	});
 	
-
-	wndNewWindow.add(courseNumbers);
-
 	if (courseData.announce.length > 0) {
 		var courseAnnouncements = courseData.announce;
 
