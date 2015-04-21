@@ -36,7 +36,7 @@ var courseData = createCourses();
 
 function createNewRightDrawer() {
 	var win = Ti.UI.createWindow({
-		backgroundColor: "#bbbbb"
+		backgroundColor: "#e9e9e9"
 	});
 
 	var data = [];
@@ -211,16 +211,15 @@ function loadCourseByID(id){
 
 function createCourseDetails(courseData) {
 	
-	var rightBtn = Ti.UI.createButton({
-		title : "+"
+	var rightBtn = Titanium.UI.createImageView({
+		   image: "Shared/hamburger.png",
+		   height:20, 
+		   width:20,
 	});
 	rightBtn.addEventListener("click", function() {
 		drawer.toggleRightWindow();
 	});
-	var refreshButton1 = Ti.UI.createButton({
-		title : "ref"
-	});
-	var refreshButton= Titanium.UI.createImageView({
+	var refreshButton = Titanium.UI.createImageView({
 	   image: "Shared/refresh.png",
 	   height:20, 
 	   width:20
@@ -249,7 +248,7 @@ function createCourseDetails(courseData) {
 		height: 20
 	});
 	
-	var image= Titanium.UI.createImageView({
+	var image = Titanium.UI.createImageView({
 	   image: "Shared/main.png",
 	   height:30, 
 	   width:30, 
@@ -275,17 +274,14 @@ function createCourseDetails(courseData) {
 		rightBtn.addEventListener("click", function() {
 			//send email
 			var selected =  Alloy.Globals.selectedEmailData;
-			var options = 	Alloy.Globals.selectedEmailOptions;
 			Ti.API.log("Selected Emails " + JSON.stringify(Alloy.Globals.selectedEmailData));
 			var emails = [];
 			for(var r = 0; r < selected.length; r++ ){
-				if(options.indexOf(r) !== -1){
+				if(selected[r].hasCheck){
 					emails.push(selected[r].title);
 				}
 			}
-			
 			Ti.API.log("sending to " + emails);
-			
 			var emailDrawer = Ti.UI.createEmailDialog();
 			emailDrawer.toRecipients = emails;
 			emailDrawer.open();
@@ -310,18 +306,17 @@ function createCourseDetails(courseData) {
 		var selectedOptions;
 		if(!Alloy.Globals.selectedEmailData){
 			Alloy.Globals.selectedEmailData = [];
-			Alloy.Globals.selectedEmailOptions = [0];
 		}
 		
-		studentEmailData = Alloy.Globals.selectedEmailData;
-		selectedOptions = Alloy.Globals.selectedEmailOptions;	
-		
-		
+		studentEmailData = Alloy.Globals.selectedEmailData;	
 		var cd = courseData.students;
 		Ti.API.log("Course Data on email call: " +  JSON.stringify(cd));
 		for(var i = 0; i < cd.length; i++){
 			if(cd[i].email){
-				var row = Ti.UI.createTableViewRow({hasCheck: selectedOptions.indexOf(i) !== -1, title: cd[i].email });
+				var row = Ti.UI.createTableViewRow({
+						hasCheck: false,
+						title: cd[i].email 
+				});
 				row.hasCheck = true;
 	  			studentEmailData.push(row);
   			}
@@ -332,17 +327,9 @@ function createCourseDetails(courseData) {
 		
 		tblEmail.addEventListener('click', function(e) {
 		  var state = e.rowData.hasCheck;
-		  // reuse existing row (using its configuration, not its instance)
 		  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title });
+		  Alloy.Globals.selectedEmailData[e.index] = row;
 		  tblEmail.updateRow(e.index, row, {animated: true});
-		  
-		  if (state) {
-		    selectedOptions.push(e.index);
-		  } else {
-		    selectedOptions.splice(selectedOptions.indexOf(e.index),1);
-		   }
-		   Ti.API.log("Course Data event: " +  JSON.stringify(tblEmail.data));
-		   Alloy.Globals.selectedEmailOptions = selectedOptions;
 		});
 		
 		var emailView = Ti.UI.createView({
@@ -361,6 +348,13 @@ function createCourseDetails(courseData) {
  	});
 	
 	newView.add(image);
+	
+	//get random color from our globals
+	var colorCode = Math.floor((Math.random() * Alloy.Globals.pasterColorCodes.length));
+	
+	
+	
+	newView.setBackgroundColor(Alloy.Globals.pasterColorCodes[colorCode].color);
 	wndNewWindow.add(newView);
 	
 	
@@ -413,11 +407,12 @@ function createCourseDetails(courseData) {
 		
 	   if (e.direction == 'left') {
 		  	if(leftAllowed){
-		  		drawer.centerWindow = left;
+		  		drawer.centerWindow = left.setAnimationMode(NappDrawerModule.ANIMATION_SLIDE);
+		  		
 		  	}
 	   } else if (e.direction == 'right') {
 			if(rightAllowed){
-		   			drawer.centerWindow = right; 
+		   			drawer.centerWindow = right.setAnimationMode(NappDrawerModule.ANIMATION_SLIDE); 
 		   	} 
 	   }
 	});

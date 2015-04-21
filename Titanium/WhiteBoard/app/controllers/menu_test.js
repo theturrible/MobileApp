@@ -95,85 +95,169 @@ var scrollView = Ti.UI.createScrollView({
     showHorizontalScrollIndicator: false
 });
 
+/*********************
+ * 
+ * Scroll view
+ * 
+ */
 
+function createNewRightDrawer() {
+	var win = Ti.UI.createView({
+		
+	});
 
+	var data = [];
 
-var slider = Ti.UI.createSlider({
-	top: "20dp", width: "280dp",
-    min: 0, max: 1,
-    value: 0.2
-});
-var label = Ti.UI.createLabel({
-    text: "Parallax: " + slider.value,
-    color:"#000",
-    top: "15dp"
-});
-slider.addEventListener('touchend', function(e) {
-	label.setText("Parallax: " + e.source.value);
-    drawer.setParallaxAmount(e.source.value);
-});
-scrollView.add(label);
-scrollView.add(slider);	
-
-var gestureModeBtn = Ti.UI.createButton({title:"Gesture Mode: ALL", toggled:true, top:10});
-gestureModeBtn.addEventListener("click", function(e){
-	if(!e.source.toggled){
-		var mode = "ALL";
-		drawer.setOpenDrawerGestureMode(NappDrawerModule.OPEN_MODE_ALL);
-	} else {
-		var mode = "NONE";
-		drawer.setOpenDrawerGestureMode(NappDrawerModule.OPEN_MODE_NONE);
-	}
-	gestureModeBtn.setTitle("Gesture Mode: " + mode);
-	e.source.toggled = !e.source.toggled;
 	
-});
-scrollView.add(gestureModeBtn);
+	var data1 =	[
+			{title : 'Check In'},
+			{title:  'Email'},
+			{title : 'Log Out'}
+		];
 
+	//populate the drawer wiht the new course names
+	
+	for(var i = 0; i < Alloy.Globals.courseData.length; i++){
+		var currentCourse = Alloy.Globals.courseData[i];
+		var courseView = createCourseDetails(currentCourse);
+		data.push({title: currentCourse.section + " " + currentCourse.num, courseID: currentCourse._id, courseView : courseView});
+		Titanium.API.log("Added Course: " + JSON.stringify(courseView));	
+	}
+	//static
+	//var checkin = createCheckinWindow();
+	//data.push({title: 'Check In', courseID: 'NAN', courseView: checkin});
+	Alloy.Globals.courseViews = data;
+	
+	var tableView = Ti.UI.createTableView({
+		data : data,
+		style : Ti.UI.iPhone.TableViewStyle.PLAIN,
+		separatorStyle : Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
+		separatorColor : 'transparent',
+		top : 20, 
+		height: 400
+		
+	});
+	var tableView2 = Ti.UI.createTableView({
+		data : data1,
+		style : Ti.UI.iPhone.TableViewStyle.PLAIN,
+		separatorStyle : Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
+		separatorColor : 'transparent',
+		top : 420
+		
+	});
+	tableView2.addEventListener("click", function(e) {
+		
+		if(e.rowData.title == 'Log Out'){
+			Titanium.API.log("logout ");
+			logout();
+		}else if(e.rowData.title == 'Email'){			
+			var email = Ti.UI.createEmailDialog({
+				toRecipient: "grin.van@gmail.com", 
+				messageBody: "asdf"
+				});
+			email.open();
+		
+		}else{
+			Titanium.API.log("checkin");
+			// Create a window.
+			Alloy.Globals.centerView = drawer.centerWindow;
+			var leftButton = Ti.UI.createButton({
+				title : "Back"
+			});
+			leftButton.addEventListener("click", function() {
+				drawer.centerWindow = Alloy.Globals.centerView;
+			});
+			var rightBtn = Ti.UI.createButton({
+				title : "+"
+			});
+			rightBtn.addEventListener("click", function() {
+				drawer.toggleRightWindow();
+			});
+			
+			var window = Titanium.UI.createView({  
+			        leftNavButton: leftButton,
+			        rightNavButton: rightBtn,
+			        title:'Check in',
+			        navBarHidden:false
+			});
+			// Instantiate the Scandit SDK Barcode Picker view.
+			picker = scanditsdk.createView({
+			    width:"100%",
+			    height:"100%"
+			});
+			// Initialize the barcode picker.
+			picker.init("fFvmD4wd41NCJBmJPZFvSHAc35gnIeQJ1lwRx9cw6Pk", 0);
+			 picker.setSuccessCallback(function(e) {
+			 	
+			 	var httpClient = Ti.Network.createHTTPClient({timeout: 10000});
+		
+				httpClient.onload = function(){
+					var answer = JSON.parse(httpClient.responseText);
+					if(answer.status == true){
+						alert("Successful check in!");
+						drawer.centerWindow = Alloy.Globals.centerView;
+					}else{
+						alert("Failed checkin :(");
+					}
+					
+								
+				};
+				httpClient.onerror = function(){
+				
+				};
+				httpClient.open('POST', 'http://ifdef.me:8080/api/courses/checkin?auth=' + Titanium.App.Properties.getString("user_auth_token"));
+				httpClient.setRequestHeader('Content-Type', 'application/json');
+				
+				var data = {
+					user_checkin_token: e.barcode	
+				};
+				httpClient.send(JSON.stringify(data));
+		    });
+			// Add it to the window and open it.
+			window.add(picker);
+			
+			window.addEventListener('open', function(e) {
+		        // Adjust to the current orientation.
+		        // since window.orientation returns 'undefined' on ios devices 
+		        // we are using Ti.UI.orientation (which is deprecated and no longer 
+		        // working on Android devices.)
+		        if(Ti.Platform.osname == 'iphone' || Ti.Platform.osname == 'ipad'){
+		            picker.setOrientation(Ti.UI.orientation);
+		        }   
+		        else {
+		            picker.setOrientation(window.orientation);
+		        }
+		        
+		        picker.setSize(Ti.Platform.displayCaps.platformWidth, 
+		                       Ti.Platform.displayCaps.platformHeight);
+		        picker.startScanning();     // startScanning() has to be called after the window is opened. 
+		    });
+			
+			drawer.centerWindow = win;
+			drawer.toggleRightWindow();
+			}
+	});
 
-function updateSlider(value){
-	slider.value=value;
-	slider.fireEvent("touchend", {source:{value:value}});
+	tableView.addEventListener("click", function(e) {
+		
+		Titanium.API.log("getting course by id: " + e.rowData.courseID);
+		if(e.rowData.title == 'log out'){
+			logout();
+		}else{
+			loadCourseByID(e.rowData.courseID);
+		}
+	});
+
+	win.add(tableView);
+	win.add(tableView2);
+	return win;
 }
 
-// animation mode
-var animationMode = 0;
-var animationModeBtn = Ti.UI.createButton({
-	title:"Animation Mode: NONE", 
-	top:10
-});
-var aniModeText;
-animationModeBtn.addEventListener("click", function(e){
-	if(animationMode == 3){
-		animationMode = 0;
-	} else {
-		animationMode++;
-	}
-	switch(animationMode){
-		case 0:
-			drawer.setAnimationMode(NappDrawerModule.ANIMATION_NONE);
-			updateSlider(0.2);
-			aniModeText = "NONE";
-			break;
-		case 1:
-			drawer.setAnimationMode(NappDrawerModule.ANIMATION_SLIDEUP);
-			updateSlider(0);
-			aniModeText = "SLIDEUP";
-			break;
-		case 2:
-			drawer.setAnimationMode(NappDrawerModule.ANIMATION_ZOOM);
-			updateSlider(0);
-			aniModeText = "ZOOM";
-			break;
-		case 3:
-			drawer.setAnimationMode(NappDrawerModule.ANIMATION_SCALE);
-			updateSlider(0);
-			aniModeText = "SCALE";
-			break;
-	}
-	animationModeBtn.setTitle("Animation Mode: " + aniModeText);
-});
-scrollView.add(animationModeBtn);
+
+
+
+
+
 
 centerView.add(scrollView);
 
