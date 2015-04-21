@@ -36,7 +36,7 @@ var courseData = createCourses();
 
 function createNewRightDrawer() {
 	var win = Ti.UI.createWindow({
-		backgroundColor: "#bbbbb"
+		backgroundColor: "#e9e9e9"
 	});
 
 	var data = [];
@@ -348,6 +348,13 @@ function createCourseDetails(courseData) {
  	});
 	
 	newView.add(image);
+	
+	//get random color from our globals
+	var colorCode = Math.floor((Math.random() * Alloy.Globals.pasterColorCodes.length));
+	
+	
+	
+	newView.setBackgroundColor(Alloy.Globals.pasterColorCodes[colorCode].color);
 	wndNewWindow.add(newView);
 	
 	
@@ -400,11 +407,12 @@ function createCourseDetails(courseData) {
 		
 	   if (e.direction == 'left') {
 		  	if(leftAllowed){
-		  		drawer.centerWindow = left;
+		  		drawer.centerWindow = left.setAnimationMode(NappDrawerModule.ANIMATION_SLIDE);
+		  		
 		  	}
 	   } else if (e.direction == 'right') {
 			if(rightAllowed){
-		   			drawer.centerWindow = right; 
+		   			drawer.centerWindow = right.setAnimationMode(NappDrawerModule.ANIMATION_SLIDE); 
 		   	} 
 	   }
 	});

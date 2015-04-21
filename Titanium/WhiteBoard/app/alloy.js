@@ -69,3 +69,13 @@ Alloy.Globals.getCourseData = function(){
 };
 
 Alloy.Globals.getCourseData;
+
+
+
+Alloy.Globals.pasterColorCodes = [
+	{color: '#77DD77'},
+	{color: '#CB99C9'},
+	{color: '#03C03C'},
+	{color: '#B19CD9'},
+	{color: '#CFCFC4'}
+];
