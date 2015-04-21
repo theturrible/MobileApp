@@ -29,7 +29,6 @@ httpClient.onload = function(){
 			$.index.open();
 		}else{
 			$.index.open();
-			alert("You have been logged out, please login again.");
 		}	
 	}
 };

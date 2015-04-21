@@ -1,5 +1,5 @@
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
-Titanium.UI.setBackgroundImage("shared/bkg_login.jpg");
+Titanium.UI.setBackgroundImage("Shared/bkg_login.jpg");
  var win = Titanium.UI.createWindow();
  
 var txtEmail = Titanium.UI.createTextField({
@@ -53,7 +53,7 @@ btnSignup.addEventListener('click', function(){
 		Titanium.API.log(res);
 		Titanium.App.Properties.setString("loginID", res.id);			
 		win.close();
-		Alloy.createController('dashboard').getView();
+		Alloy.createController('index').getView();
 	};
 	httpClient.onerror = function(){
 		Titanium.API.log("error");
