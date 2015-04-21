@@ -80,7 +80,7 @@ function createNewRightDrawer() {
 		
 	});
 	tableView2.addEventListener("click", function(e) {
-		drawer.closeRightWindow();
+		drawer.toggleRightWindow();
 		if(e.rowData.title == 'Log Out'){
 			Titanium.API.log("logout ");
 			logout();
@@ -112,7 +112,8 @@ function createNewRightDrawer() {
 		});
 
 		refreshButton.addEventListener("click", function() {
-			drawer.centerWindow = Alloy.Globals.beforeLogin;
+			var courseData = createCourses();
+			drawer.close();
 			Alloy.Globals.selectedCourseSub = [];
 			
 		});
@@ -147,9 +148,9 @@ function createNewRightDrawer() {
 		}
 		
 		Alloy.Globals.selectedEmailData = courseData;
-		var tblEmail = Ti.UI.createTableView();
+		var tblSub = Ti.UI.createTableView();
 		
-		tblEmail.addEventListener('click', function(e) {
+		tblSub.addEventListener('click', function(e) {
 		 	//make it happen.
 			var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
 			httpClient.onload = function(){
@@ -160,7 +161,7 @@ function createNewRightDrawer() {
 					  var state = e.rowData.hasCheck;
 					  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title, data: e.rowData.data});
 					  Alloy.Globals.selectedEmailData[e.index] = row;
-					  tblEmail.updateRow(e.index, row, {animated: true});	
+					  tblSub.updateRow(e.index, row, {animated: true});	
 				}else if(resp.status == "dupe"){
 					alert("already subscribed");
 				}else{
@@ -184,7 +185,7 @@ function createNewRightDrawer() {
 		});
 		
 		tblEmail.setData(courseData);
-		emailView.add(tblEmail);
+		emailView.add(tblSub);
 		emailList.add(emailView);
 		
 		var navController1 = Ti.UI.iOS.createNavigationWindow({
