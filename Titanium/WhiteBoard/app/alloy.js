@@ -74,8 +74,9 @@ Alloy.Globals.getCourseData;
 
 Alloy.Globals.pasterColorCodes = [
 	{color: '#77DD77'},
-	{color: '#CB99C9'},
 	{color: '#03C03C'},
 	{color: '#B19CD9'},
-	{color: '#CFCFC4'}
+	{color: '#F49AC2'},
+	{color: '#FFB347'},
+	
 ];

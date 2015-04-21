@@ -44,8 +44,9 @@ function createNewRightDrawer() {
 	
 	var data1 =	[
 			{title : 'Check In'},
-			{title:  'Email'},
-			{title : 'Log Out'}
+			{title :  'Email'},
+			{title : 'Log Out'},
+			{title : 'Subscribe to'}
 		];
 
 	//populate the drawer wiht the new course names
@@ -90,6 +91,110 @@ function createNewRightDrawer() {
 				});
 			email.open();
 		
+		}else if (e.rowData.title == 'Subscribe to'){
+			Titanium.API.log("subscribe");
+			Alloy.Globals.beforeLogin = drawer.centerWindow;
+		var rightBtn =  Titanium.UI.createImageView({
+		   image: "Shared/hamburger.png",
+		   height:20, 
+		   width:20,
+		   left : Ti.App.SCREEN_WIDTH - 60,
+		});
+	
+		var refreshButton =  Titanium.UI.createImageView({
+		   image: "Shared/x.png",
+		   height:20, 
+		   width:20,
+		});
+		
+		rightBtn.addEventListener("click", function() {
+			drawer.toggleRightWindow();
+		});
+
+		refreshButton.addEventListener("click", function() {
+			drawer.centerWindow = Alloy.Globals.beforeLogin;
+			Alloy.Globals.selectedCourseSub = [];
+			
+		});
+		
+		var emailList = Ti.UI.createWindow({
+			modal: true,
+			leftNavButton  : refreshButton,
+			rightNavButton : rightBtn,
+			title : "All Courses",
+			backgroundColor : '#b3b3b3',
+			
+		});
+		var courseData;
+		var selectedOptions;
+		if(!Alloy.Globals.selectedCourseSub){
+			Alloy.Globals.selectedCourseSub = [];
+		}
+		
+		courseData = Alloy.Globals.selectedCourseSub;	
+		var cd = Alloy.Globals.courses;
+		Ti.API.log("Course Data on email call: " +  JSON.stringify(cd));
+		for(var i = 0; i < cd.length; i++){
+			if(cd[i].name){
+				var row = Ti.UI.createTableViewRow({	
+						hasCheck: false,
+						title: cd[i].name + "( "+ cd[i].section + " " + cd[i].num + " @" + cd[i].startTime + " )",
+						data: cd[i],
+						
+				});
+	  			courseData.push(row);
+  			}
+		}
+		
+		Alloy.Globals.selectedEmailData = courseData;
+		var tblEmail = Ti.UI.createTableView();
+		
+		tblEmail.addEventListener('click', function(e) {
+		 	//make it happen.
+			var httpClient = Ti.Network.createHTTPClient({timeout: 1000});
+			httpClient.onload = function(){
+				var resp = JSON.parse(httpClient.responseText);
+				Ti.API.log(httpClient.responseText);
+				if(resp.status == "true"){
+					alert("Added Course");
+					  var state = e.rowData.hasCheck;
+					  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title, data: e.rowData.data});
+					  Alloy.Globals.selectedEmailData[e.index] = row;
+					  tblEmail.updateRow(e.index, row, {animated: true});	
+				}else if(resp.status == "dupe"){
+					alert("already subscribed");
+				}else{
+					alert("Failed to subscribe ;()");
+				}
+			};
+			
+			httpClient.onerror = function(){
+				alert("Couldn't add course");
+			};
+			
+			httpClient.open('POST', 'http://ifdef.me:8080/api/user/addcourse?auth='+ Titanium.App.Properties.getString("user_auth_token") );
+			httpClient.setRequestHeader('Content-Type', 'application/json');
+			Ti.API.log("Adding user to course:  " + e.rowData.data._id + " with auth: " + Titanium.App.Properties.getString("user_auth_token"));
+			var courses = { courseId : e.rowData.data._id};
+			httpClient.send(JSON.stringify(courses));
+		});
+		
+		var emailView = Ti.UI.createView({
+			height: Ti.App.SCREEN_HEIGHT - 70, 
+		});
+		
+		tblEmail.setData(courseData);
+		emailView.add(tblEmail);
+		emailList.add(emailView);
+		
+		var navController1 = Ti.UI.iOS.createNavigationWindow({
+			window: emailList
+		});
+		drawer.centerWindow = navController1;
+			
+			
+			
+			
 		}else{
 			Titanium.API.log("checkin");
 			// Create a window.
@@ -128,6 +233,9 @@ function createNewRightDrawer() {
 					var answer = JSON.parse(httpClient.responseText);
 					if(answer.status == true){
 						alert("Successful check in!");
+						drawer.centerWindow = Alloy.Globals.centerView;
+					}else if(answer.status == 'dupe'){
+						alert("Already checked in!");
 						drawer.centerWindow = Alloy.Globals.centerView;
 					}else{
 						alert("Failed checkin :(");
@@ -234,7 +342,7 @@ function createCourseDetails(courseData) {
 	var wndNewWindow = Ti.UI.createWindow({
 		leftNavButton  : refreshButton,
 		rightNavButton : rightBtn,
-		title : courseData.name,
+		title : courseData.section + " " + courseData.num,
 		cID : courseData._id,
 		backgroundColor : '#b3b3b3'
 	});
@@ -351,9 +459,6 @@ function createCourseDetails(courseData) {
 	
 	//get random color from our globals
 	var colorCode = Math.floor((Math.random() * Alloy.Globals.pasterColorCodes.length));
-	
-	
-	
 	newView.setBackgroundColor(Alloy.Globals.pasterColorCodes[colorCode].color);
 	wndNewWindow.add(newView);
 	
@@ -375,12 +480,17 @@ function createCourseDetails(courseData) {
 			headerTitle : 'Announcements'
 		});
 		
-		for (var i = 0; i < courseAnnouncements.length; i++) {
+		for (var i = courseAnnouncements.length-1; i > 0; i--) {
 			var announcement = courseAnnouncements[i];
 			section1.add(Ti.UI.createTableViewRow({
-				title : announcement.body
+				title : announcement.body,
+				date  : announcement.create
 			}));
 		}
+		section1.addEventListener('click', function(e){
+			alert(e.rowData.title + " \n Posted On: " + moment(e.rowData.date).format("DD/MM/YY HH:MM") );
+		});
+		
 	}
 	wndNewWindow.addEventListener('swipe', function(e) {
 		var data =  Alloy.Globals.courseViews;
@@ -423,12 +533,23 @@ function createCourseDetails(courseData) {
 		var section2 = Ti.UI.createTableViewSection({
 			headerTitle : 'Assignments'
 		});
-		for (var i = 0; i < courseAssignments.length; i++) {
+		for (var i = courseAssignments.length-1; i > 0 ; i--) {
 			var assignment = courseAssignments[i];
 			section2.add(Ti.UI.createTableViewRow({
-				title : assignment.name
+				title : assignment.name,
+				data : assignment
 			}));
 		}
+		
+		section2.addEventListener('click', function(e){
+			var dialog = Ti.UI.createAlertDialog({
+			    message: e.rowData.data.body + "\n Due: " + e.rowData.data.dueDate + " " + e.rowData.data.dueTime + 
+				"\n Points Possible: " + e.rowData.data.points   + " \n Posted On: " + moment(e.rowData.create).format("DD/MM/YY HH:MM") ,
+			    ok: 'Okay',
+			    title: e.rowData.data.name
+			  });
+			  dialog.show();
+		});
 	}
 
 	var table = Ti.UI.createTableView({
@@ -557,8 +678,12 @@ function createMenu() {
 }
 
 function createCalendarView(prev){
-	var rightBtn = Ti.UI.createButton({
-		title: 'Menu'
+	var colorCode = Math.floor((Math.random() * Alloy.Globals.pasterColorCodes.length));
+	
+	var rightBtn = Titanium.UI.createImageView({
+		   image: "Shared/hamburger.png",
+		   height:20, 
+		   width:20,
 	});
 	rightBtn.addEventListener("click", function() {
 		drawer.toggleRightWindow();
@@ -566,9 +691,18 @@ function createCalendarView(prev){
 	
 	var wndNewWindow = Ti.UI.createWindow({
 		rightNavButton : rightBtn,
-		title : "Temp View"
+		title : "Hello!"
 	});
-
+	
+	var lblHello = Ti.UI.createLabel({
+		text: "Seems like you are not subscribed to anything, but don't worry,  you can do that in the menu!",
+		font: { fontSize:24 },
+		left: 10, 
+		top : Ti.App.SCREEN_HEIGHT/2 - 150
+	});
+	
+	wndNewWindow.add(lblHello);
+	wndNewWindow.setBackgroundColor(Alloy.Globals.pasterColorCodes[colorCode].color);
 	var navController2 = Ti.UI.iOS.createNavigationWindow({
 		window : wndNewWindow
 	});
@@ -874,7 +1008,13 @@ drawer.addEventListener	('allDone', function(e) {
 	Titanium.API.log("allDone");	
 	//lets finish all of the apps..
 	drawer.rightWindow = createNewRightDrawer();
-	drawer.centerWindow = Alloy.Globals.courseViews[0].courseView;
+	
+	if(Alloy.Globals.courseViews.length > 0){
+		drawer.centerWindow = Alloy.Globals.courseViews[0].courseView;
+	}else{
+		drawer.centerWindpw = createCalendarView();
+	}
+	
 	drawer.open();
 	
 });
