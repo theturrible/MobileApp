@@ -118,6 +118,7 @@ function createNewRightDrawer() {
 					courses.push(selected[r].data._id);
 				}
 			}
+
 			Ti.API.log("sending to " + courses);
 		});
 
@@ -152,9 +153,6 @@ function createNewRightDrawer() {
 						data: cd[i],
 						
 				});
-
-
-				
 	  			courseData.push(row);
   			}
 		}
@@ -164,7 +162,7 @@ function createNewRightDrawer() {
 		
 		tblEmail.addEventListener('click', function(e) {
 		  var state = e.rowData.hasCheck;
-		  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title });
+		  var row = Ti.UI.createTableViewRow({hasCheck: !state, title: e.rowData.title, data: e.rowData.data });
 		  Alloy.Globals.selectedCourseSub[e.index] = row;
 		  tblEmail.updateRow(e.index, row, {animated: true});
 		});
@@ -473,9 +471,14 @@ function createCourseDetails(courseData) {
 		for (var i = 0; i < courseAnnouncements.length; i++) {
 			var announcement = courseAnnouncements[i];
 			section1.add(Ti.UI.createTableViewRow({
-				title : announcement.body
+				title : announcement.body,
+				date  : announcement.create
 			}));
 		}
+		section1.addEventListener('click', function(e){
+			alert(e.rowData.title + " \n Posted On: " + moment(e.rowData.date).format("DD/MM/YY HH:MM") );
+		});
+		
 	}
 	wndNewWindow.addEventListener('swipe', function(e) {
 		var data =  Alloy.Globals.courseViews;
@@ -521,9 +524,15 @@ function createCourseDetails(courseData) {
 		for (var i = 0; i < courseAssignments.length; i++) {
 			var assignment = courseAssignments[i];
 			section2.add(Ti.UI.createTableViewRow({
-				title : assignment.name
+				title : assignment.name,
+				data : assignment
 			}));
 		}
+		
+		section2.addEventListener('click', function(e){
+			alert(e.rowData.data.name + "\n Details: " + e.rowData.data.body + "\n Due: " + e.rowData.data.dueDate + " " + e.rowData.data.dueTime + 
+				"\n Points: " + e.rowData.data.points   + " \n Posted On: " + moment(e.rowData.create).format("DD/MM/YY HH:MM") );
+		});
 	}
 
 	var table = Ti.UI.createTableView({
