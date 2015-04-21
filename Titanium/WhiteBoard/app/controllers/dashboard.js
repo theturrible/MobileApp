@@ -132,7 +132,7 @@ function createNewRightDrawer() {
 			Alloy.Globals.selectedCourseSub = [];
 		}
 		
-		courseData = Alloy.Globals.selectedCourseSub;	
+		courseData = [];	
 		var cd = Alloy.Globals.courses;
 		Ti.API.log("Course Data on email call: " +  JSON.stringify(cd));
 		for(var i = 0; i < cd.length; i++){
