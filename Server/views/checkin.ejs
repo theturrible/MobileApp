@@ -12,7 +12,7 @@
       <% if(checkin.length > 0){ %>
           var time = moment();
           var expire = moment('<%= checkin[checkin.length-1].expire %>');
-          var socket = io('http://localhost:8080').connect();
+          var socket = io('http://ifdef.me:8080').connect();
 
           socket.on('refNum', function(data){
             console.log('got:')
