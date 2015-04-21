@@ -533,7 +533,7 @@ function createCourseDetails(courseData) {
 		var section2 = Ti.UI.createTableViewSection({
 			headerTitle : 'Assignments'
 		});
-		for (var i = 0; i < courseAssignments.length; i++) {
+		for (var i = courseAssignments.length-1; i > 0 ; i--) {
 			var assignment = courseAssignments[i];
 			section2.add(Ti.UI.createTableViewRow({
 				title : assignment.name,
