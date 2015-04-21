@@ -184,7 +184,7 @@ function createNewRightDrawer() {
 			height: Ti.App.SCREEN_HEIGHT - 70, 
 		});
 		
-		tblEmail.setData(courseData);
+		tblSub.setData(courseData);
 		emailView.add(tblSub);
 		emailList.add(emailView);
 		
