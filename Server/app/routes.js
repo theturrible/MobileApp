@@ -595,7 +595,7 @@ module.exports = function(app, passport, jwt, io) {
 
             UserModel.findById(decoded.id, function (err, user){
                 if(err)
-                    return res.json({status : 'error 1'});
+                    return res.json({status : 500});
 
                 for(var i=0; i < user.courses.length; i++){
                     if(user.courses[i].courseId === req.body.courseId )
@@ -605,10 +605,10 @@ module.exports = function(app, passport, jwt, io) {
                 user.courses.push({ courseId : req.body.courseId });
                 user.save(function (err){
                     if(err)
-                        return res.json({status : 'error 2'});
+                        return res.json({status : 500});
                     CourseModel.findById(req.body.courseId, function (err, course){
                         if(err)
-                            return res.json({status : 'error 3'});
+                            return res.json({status : 500});
 
                         for(var i=0; i < course.students.length; i++){
                             if(course.students[i].studentId === decoded.id)
@@ -618,8 +618,8 @@ module.exports = function(app, passport, jwt, io) {
                         course.students.push({ studentId : decoded.id, email : decoded.email });
                         course.save(function (err){
                             if(err)
-                                return res.json({status : 'error 4'});
-                            return res.json({ courses : user.courses });
+                                return res.json({status : 500 });
+                            return res.json({ status : true });
                         });
                     });
                 });
